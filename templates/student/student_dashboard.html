@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师工作台 - 实验课程管理系统</title>
+    <link href="{% static 'bootstrap-5.0.2/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+<style>
+    .side-nav {
+        width: 280px;
+        height: 100vh;
+        position: fixed;
+        border-right: 1px solid #dee2e6;
+    }
+    .main-content {
+        margin-left: 280px;
+        padding: 20px;
+    }
+    .stat-card {
+        transition: all 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15)!important;
+    }
+</style>
+</head>
+<body>
+
+<!-- 侧边导航 -->
+<nav class="side-nav bg-light p-3">
+    <h4 class="mb-4"><i class="fas fa-user-graduate"></i> 学生工作台</h4>
+    <div class="list-group">
+        <a href="#home" class="list-group-item list-group-item-action active"><i class="fas fa-home"></i> 个人主页</a>
+        <a href="#courses" class="list-group-item list-group-item-action"><i class="fas fa-book-open"></i> 我的课程</a>
+        <a href="#reports" class="list-group-item list-group-item-action"><i class="fas fa-file-upload"></i> 实验报告</a>
+        <a href="#exam" class="list-group-item list-group-item-action"><i class="fas fa-edit"></i> 在线考试</a>
+    </div>
+</nav>
+
+<div class="main-content">
+    <!-- 个人主页 -->
+    <section id="home">
+        <div class="row">
+            <!-- 学习统计 -->
+            <div class="col-md-6">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-chart-line"></i> 学习统计</h5>
+                        <div class="progress mb-2">
+                            <div class="progress-bar" style="width: 75%">课程进度 75%</div>
+                        </div>
+                        <p>累计学习时长：36小时</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 成绩分析 -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-chart-pie"></i> 成绩分布</h5>
+                        <canvas id="scoreChart" style="height: 150px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 我的课程 -->
+    <section id="courses" class="mt-4">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-book"></i> 已选课程</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>基础化学实验</h5>
+                                <button class="btn btn-sm btn-primary">进入学习</button>
+                                <button class="btn btn-sm btn-success">课程签到</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 更多课程 -->
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- 同教师界面脚本 -->
+</body>
+</html>

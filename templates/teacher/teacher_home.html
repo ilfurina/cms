@@ -1,0 +1,280 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>教师工作台 - 实验课程管理系统</title>
+
+    <!-- Bootstrap 3 CSS -->
+    <link rel="stylesheet" href="{% static 'bootstrap-3.4.1/css/bootstrap.css' %}">
+
+
+    <style>
+        .class-list {
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            border-right: 1px solid #ddd;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .class-item.active {
+            background-color: #f5f5f5;
+        }
+        .resource-thumbnail {
+            height: 150px;
+            overflow: hidden;
+        }
+        .nav-tabs {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<nav class="navbar navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">教师工作台</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#"><span class="glyphicon glyphicon-bell"></span> 消息</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="glyphicon glyphicon-user"></span> 王老师 <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">个人中心</a></li>
+                        <li><a href="#">退出登录</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- 左侧班级列表 -->
+        <div class="col-md-3 class-list">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">我的班级
+                        <button class="btn btn-xs btn-primary pull-right" data-toggle="modal" data-target="#createClassModal">
+                            <span class="glyphicon glyphicon-plus"></span> 新建
+                        </button>
+                    </h3>
+                </div>
+                <div class="list-group">
+                    <a href="#" class="list-group-item class-item">
+                        
+                        <h5 >2023级计算机1班</h5>
+                        <small>学生数：32人</small>
+                    </a>
+                    <a href="#" class="list-group-item class-item">
+                        <h5>2023级电子工程2班</h5>
+                        <small>学生数：28人</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧主内容 -->
+        <div class="col-md-9 main-content">
+            <!-- 班级管理导航 -->
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#classInfo" data-toggle="tab">班级信息</a></li>
+                <li><a href="#members" data-toggle="tab">成员管理</a></li>
+                <li><a href="#experiments" data-toggle="tab">实验管理</a></li>
+                <li><a href="#announcements" data-toggle="tab">公告管理</a></li>
+                <li><a href="#resources" data-toggle="tab">学习资源</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- 班级信息 -->
+                <div class="tab-pane active" id="classInfo">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">班级名称</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" value="2023级计算机1班">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">班级描述</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" rows="3">计算机专业基础实验课程班级</textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="submit" class="btn btn-primary">保存修改</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 成员管理 -->
+                <div class="tab-pane" id="members">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>学生列表</h4>
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    张三 <button class="btn btn-xs btn-danger pull-right">移除</button>
+                                </div>
+                                <div class="list-group-item">
+                                    李四 <button class="btn btn-xs btn-danger pull-right">移除</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>添加学生</h4>
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="输入学号或姓名">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button">搜索</button>
+                                </span>
+                            </div>
+                            <div class="list-group" style="margin-top: 10px;">
+                                <div class="list-group-item">
+                                    王五（学号：20231001）
+                                    <button class="btn btn-xs btn-success pull-right">添加</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 实验管理 -->
+                <div class="tab-pane" id="experiments">
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#createExperimentModal">
+                        <span class="glyphicon glyphicon-plus"></span> 创建新实验
+                    </button>
+                    <div class="table-responsive" style="margin-top: 15px;">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>实验名称</th>
+                                    <th>截止时间</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>电路基础实验一</td>
+                                    <td>2024-03-20</td>
+                                    <td><span class="label label-success">进行中</span></td>
+                                    <td>
+                                        <button class="btn btn-xs btn-default">编辑</button>
+                                        <button class="btn btn-xs btn-danger">删除</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 公告管理 -->
+                <div class="tab-pane" id="announcements">
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#createAnnouncementModal">
+                        <span class="glyphicon glyphicon-plus"></span> 发布新公告
+                    </button>
+                    <div class="list-group" style="margin-top: 15px;">
+                        <div class="list-group-item">
+                            <h5>实验报告提交说明</h5>
+                            <p>请于本周五前提交实验报告...</p>
+                            <small class="text-muted">发布时间：2024-03-01</small>
+                            <div class="btn-group pull-right">
+                                <button class="btn btn-xs btn-default">编辑</button>
+                                <button class="btn btn-xs btn-danger">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 学习资源 -->
+                <div class="tab-pane" id="resources">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="thumbnail resource-thumbnail">
+                                <div class="caption">
+                                    <h4>上传新资源</h4>
+                                    <button class="btn btn-primary btn-block">
+                                        <span class="glyphicon glyphicon-upload"></span> 选择文件
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="thumbnail resource-thumbnail">
+                                <div class="caption">
+                                    <h4>实验指导手册.pdf</h4>
+                                    <p>大小：2.3MB</p>
+                                    <button class="btn btn-default btn-xs">下载</button>
+                                    <button class="btn btn-danger btn-xs pull-right">删除</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 创建班级模态框 -->
+<div class="modal fade" id="createClassModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">创建新班级</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">班级名称</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">所属课程</label>
+                        <div class="col-sm-9">
+                            <select class="form-control">
+                                <option>计算机基础实验</option>
+                                <option>电子电路实验</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">创建</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</body>
+</html>

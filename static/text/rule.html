@@ -1,0 +1,88 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验室区域行为规范</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', '微软雅黑', sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 2.2em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .rules-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        ol {
+    list-style: none; /* 新增关键属性 */
+    counter-reset: item;
+    padding-left: 1.5rem;
+    color: #34495e;
+}
+
+        li {
+            margin-bottom: 1.2rem;
+            padding: 0.8rem;
+            border-left: 3px solid #3498db;
+            transition: all 0.3s ease;
+        }
+
+        li:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        li::before {
+            content: counter(item) ".";
+            counter-increment: item;
+            font-weight: bold;
+            color: #3498db;
+            margin-right: 0.8rem;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                margin: 1rem auto;
+            }
+            .rules-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>实验室区域行为规范</h1>
+    <div class="rules-container">
+        <ol>
+            <li>不得在实验室饮食、储存食品、饮料等个人生活物品；不得做与实验、研究无关的事情。</li>
+            <li>整个实验室区域禁止吸烟(包括室内、走廊、电梯间等)。</li>
+            <li>未经实验室管理部门允许不得将外人带进实验室。</li>
+            <li>熟悉紧急情况下的逃离路线和紧急应对措施，清楚急救箱、灭火器材、紧急洗眼装置和冲淋器的位置。铭记急救电话119/120/110。</li>
+            <li>保持实验室门和走道畅通，最小化存放实验室的试剂数量，未经允许严禁储存剧毒药品。</li>
+            <li>离开实验室前须洗手，不可穿实验服、戴手套进入餐厅、图书馆、会议室、办公室等公共场所。</li>
+            <li>保持实验室干净整洁，实验结束后实验用具、器皿等及时洗净、烘干、入柜，室内和台面均无大量物品堆积，每天至少清理一次实验台。</li>
+            <li>实验工作中碰到疑问及时请教该实验室或仪器设备责任人，不得盲目操作。</li>
+            <li>做实验期间严禁长时间离开实验现场。</li>
+            <li>晚上、节假日做某些危险实验时室内必须有二人以上，以保实验安全。</li>
+        </ol>
+    </div>
+</body>
+</html>

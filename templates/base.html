@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block tittle %}{% endblock %}</title>
+    {% block head %}{% endblock %}
+
+    <!-- Bootstrap 3 CSS -->
+
+    <link rel="stylesheet" href="{% static 'bootstrap-5.0.2/css/bootstrap.css' %}">
+    <script src="{% static 'bootstrap-5.0.2/js/popper.min.js' %}"></script>
+    <script src="{% static 'bootstrap-5.0.2/js/bootstrap.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+    <!-- 自定义样式 -->
+    <style>
+        .carousel-inner img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+        .news-section {
+            margin-top: 20px;
+        }
+        .resource-thumbnail {
+            height: 200px;
+        }
+        .footer-links {
+            background-color: #f8f8f8;
+            padding: 20px 0;
+            margin-top: 30px;
+        }
+        body { background: white !important; }
+
+        .nav-pills .nav-item a {
+            color: black !important;
+            margin-left: 10px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- 导航栏 -->
+<div class="container">
+    <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+      <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+
+        <span class="fs-4">实验课程管理系统</span>
+      </a>
+
+      <ul class="nav nav-pills">
+{#        <li class="nav-item"><a href="#" class="nav-link active" aria-current="page">Home</a></li>#}
+        <li class="nav-item"><a href="/myauth/login/" class="nav-link">登录</a></li>
+        <li class="nav-item"><a href="/myauth/register/" class="nav-link">注册</a></li>
+      </ul>
+    </header>
+  </div>
+
+{% block content %}{% endblock %}
+</body>

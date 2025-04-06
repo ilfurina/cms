@@ -1,0 +1,200 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>实验课程管理系统</title>
+
+    <!-- Bootstrap 3 CSS -->
+    <link rel="stylesheet" href="{%  static 'bootstrap-3.4.1/css/bootstrap.css'%}">
+
+    <!-- 自定义样式 -->
+    <style>
+        .carousel-inner img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+        .news-section {
+            margin-top: 20px;
+        }
+        .resource-thumbnail {
+            height: 200px;
+        }
+        .footer-links {
+            background-color: #f8f8f8;
+            padding: 20px 0;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<nav class="navbar navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">实验课程管理系统</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/myauth/login" type="button"  class="btn btn-outline-light me-2">登录</a></li>
+                <li><a href="/myauth/register" type="button"  class="btn btn-outline-light">注册</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 轮播图 -->
+<div id="mainCarousel" class="carousel slide" data-ride="carousel">
+    <ol class="carousel-indicators">
+        <li data-target="#mainCarousel" data-slide-to="0" class="active"></li>
+        <li data-target="#mainCarousel" data-slide-to="1"></li>
+        <li data-target="#mainCarousel" data-slide-to="2"></li>
+    </ol>
+    <div class="carousel-inner">
+        <div class="item active">
+            <img src="{% static '/img/lab1.jpg' %}" alt="实验教学" >
+            <div class="carousel-caption">
+                <h3>欢迎使用实验课程管理系统</h3>
+                <p>创新实践，安全规范</p>
+            </div>
+        </div>
+        <div class="item">
+            <img src="{% static 'img/lab2.png' %}" alt="实验室安全" >
+            <div class="carousel-caption">
+
+                <a href="/static/text/rule.html" target="_blank" >实验室规范</a>
+                <p>点击查看最新安全操作指南</p>
+            </div>
+        </div>
+    </div>
+    <a class="left carousel-control" href="#mainCarousel" role="button" data-slide="prev">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+    </a>
+    <a class="right carousel-control" href="#mainCarousel" role="button" data-slide="next">
+        <span class="glyphicon glyphicon-chevron-right"></span>
+    </a>
+</div>
+
+<!-- 主要内容 -->
+<div class="container news-section">
+    <div class="row">
+        <!-- 左侧内容 -->
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">实验室新闻</h3>
+                        </div>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item">2024年实验室开放安排 <span class="badge">新</span></a>
+                            <a href="#" class="list-group-item">新设备操作培训通知</a>
+                            <a href="#" class="list-group-item">优秀实验成果展示</a>
+                            <a href="#" class="list-group-item">----------</a>
+                            <a href="#" class="list-group-item">----------</a>
+                            <a href="#" class="list-group-item">----------</a>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">通知公告</h3>
+                        </div>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item">暑期实验室安全注意事项</a>
+                            <a href="#" class="list-group-item">实验报告提交时间调整</a>
+                            <a href="#" class="list-group-item">新实验课程上线通知</a>
+                            <a href="#" class="list-group-item">----------</a>
+                            <a href="#" class="list-group-item">----------</a>
+                            <a href="#" class="list-group-item">----------</a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧侧边栏 -->
+        <div class="col-md-4">
+            <div class="thumbnail resource-thumbnail">
+                <div class="caption">
+                    <p>智能推荐：</p>
+                    <img src="https://placehold.co/250x150" alt="智能推荐">
+
+                </div>
+            </div>
+
+            <div class="thumbnail resource-thumbnail">
+
+                <br><br>
+                <div class="caption">
+                    <h4>思政课程资源</h4>
+                    <ul>
+                        <li>科学家精神讲座</li>
+                        <li>实验伦理规范</li>
+                        <li>学科发展史专题</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 常用链接 -->
+<div class="footer-links">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h4>相关链接</h4>
+                <a href="https://ncwu.edu.cn/" class="btn btn-link" target="_blank">学校官网</a>
+                <a href="https://jwmis.ncwu.edu.cn" class="btn btn-link" target="_blank">教务系统</a>
+                <a href="#" class="btn btn-link">设备预约</a>
+                <a href="#" class="btn btn-link">安全手册</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 登录注册模态框 -->
+{#<div class="modal fade" id="loginModal" tabindex="-1">#}
+{#    <div class="modal-dialog">#}
+{#        <div class="modal-content">#}
+{#            <div class="modal-header">#}
+{#                <button type="button" class="close" data-dismiss="modal">&times;</button>#}
+{#                <h4 class="modal-title">用户登录/注册</h4>#}
+{#            </div>#}
+{#            <div class="modal-body">#}
+{#                <form action="teacher/home/">#}
+{#                    <div class="form-group">#}
+{#                        <label>用户名</label>#}
+{#                        <input type="text" class="form-control">#}
+{#                    </div>#}
+{#                    <div class="form-group">#}
+{#                        <label>密码</label>#}
+{#                        <input type="password" class="form-control">#}
+{#                    </div>#}
+{#                    <button type="submit" class="btn btn-primary">登录</button>#}
+{#                    <button type="button" class="btn btn-link">新用户注册</button>#}
+{#                </form>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+
+<!-- JavaScript -->
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</body>
+</html>
