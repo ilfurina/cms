@@ -1,5 +1,6 @@
 from django.shortcuts import render
+from accounts.decorators import teacher_required
 
-def teacher_home(request):
-
-    return render(request, 'teacher/teacher_home.html')
+@teacher_required
+def dashboard(request):
+    return render(request, 'teacher/dashboard.html')
