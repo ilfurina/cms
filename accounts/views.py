@@ -9,6 +9,8 @@ from .models import CaptchaModel
 from django.views.decorators.http import require_http_methods
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth import get_user_model,login,logout
+from teacher.models import Teacher
+from student.models import Student
 
 
 # User = get_user_model()
@@ -63,12 +65,18 @@ def register(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             user_type = form.cleaned_data.get('user_type')
+            college = form.cleaned_data.get('college')
+            school_id = form.cleaned_data.get('school_id')
+
             print(user_type)
             user =  User.objects.create_user(email=email, username=username, password=password, user_type=user_type)
             login(request, user)
             if user.user_type == 'teacher':
+
+                Teacher.objects.create(teacher_id=school_id, name=user.username,college=college, user=user)
                 return redirect('teacher:dashboard')
             else:
+                Student.objects.create(student_id=school_id, name=user.username,college=college,user = user)
                 return redirect('student:dashboard')
         else:
             print(form.errors)

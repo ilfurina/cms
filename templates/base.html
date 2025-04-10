@@ -8,14 +8,13 @@
     <title>{% block tittle %}{% endblock %}</title>
     {% block head %}{% endblock %}
 
-    <!-- Bootstrap 3 CSS -->
+    <!-- Bootstrap 5 CSS -->
 
     <link rel="stylesheet" href="{% static 'bootstrap-5.0.2/css/bootstrap.css' %}">
     <script src="{% static 'bootstrap-5.0.2/js/popper.min.js' %}"></script>
     <script src="{% static 'bootstrap-5.0.2/js/bootstrap.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
 
-    <!-- 自定义样式 -->
     <style>
         .carousel-inner img {
             width: 100%;
@@ -53,11 +52,26 @@
         <span class="fs-4">实验课程管理系统</span>
       </a>
 
-      <ul class="nav nav-pills">
-{#        <li class="nav-item"><a href="#" class="nav-link active" aria-current="page">Home</a></li>#}
-        <li class="nav-item"><a href="/myauth/login/" class="nav-link">登录</a></li>
-        <li class="nav-item"><a href="/myauth/register/" class="nav-link">注册</a></li>
-      </ul>
+        {% if user.is_authenticated %}
+                <div class="dropdown text-end">
+                    <a href="#" class="d-block link-secondary text-decoration-none dropdown-toggle" data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <img src="{% static '/img/elysia2.png' %}" alt="mdo" width="32" height="32" class="rounded-circle">
+                    </a>
+                    <ul class="dropdown-menu text-small">
+                        <li><a class="dropdown-item" href='/info/'>个人信息</a></li>
+                        <li><a class="dropdown-item" href="#">设置</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">退出登录</a></li>
+                    </ul>
+                </div>
+        {% endif %}
+
+{#      <ul class="nav nav-pills">#}
+{#        <li class="nav-item"><a href="/myauth/login/" class="nav-link">登录</a></li>#}
+{#        <li class="nav-item"><a href="/myauth/register/" class="nav-link">注册</a></li>#}
+{#      </ul>#}
+{#        #}
     </header>
   </div>
 

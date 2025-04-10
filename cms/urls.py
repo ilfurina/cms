@@ -16,19 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
 from cms import views
-from classes import views as classesviews
-from teacher import views as teacherviews
-from myauth import views as authviews
+
 
 urlpatterns = [
 
     path('', views.welcome),
-    path('classes/list/', classesviews.classlist),
     # path('teacher/home/',teacherviews.teacher_home, name='teacher/home/'),
     path('myauth/', include('myauth.urls')),
     path('accounts/', include('accounts.urls')),
     path('teacher/', include('teacher.urls')),
     path('student/', include('student.urls')),
+    path('info/', views.info,name='info'),
 ]

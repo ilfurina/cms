@@ -18,6 +18,14 @@
                 <input type="text" class="form-control" name="username" placeholder="请输入用户名">
             </div>
             <div class="mb-2">
+                <label>学院</label>
+                <input type="text" class="form-control" name="college" placeholder="请输入学院">
+            </div>
+            <div class="mb-2">
+                <label>工号/学号</label>
+                <input type="text" class="form-control" name="school_id" placeholder="请输入工号/学号">
+            </div>
+            <div class="mb-2">
                 <label>邮箱</label>
                 <input type="text" class="form-control" name="email" placeholder="请输入邮箱">
             </div>
@@ -42,11 +50,11 @@
                 <label>注册身份</label>
                 <div class="d-flex gap-3">
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="user_type" id="student" value="student">
+                        <input class="form-check-input" type="radio" name="user_type" id="student" value="student" checked>
                         <label class="form-check-label" for="student">学生</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="user_type" id="teacher" value="teacher" checked>
+                        <input class="form-check-input" type="radio" name="user_type" id="teacher" value="teacher" >
                         <label class="form-check-label" for="teacher">教师</label>
                     </div>
                 </div>

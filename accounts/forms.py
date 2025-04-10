@@ -32,6 +32,16 @@ class RegisterForm(forms.Form):
         choices=User.USER_TYPE_CHOICES,
         widget=forms.RadioSelect
         )
+    college = forms.CharField(max_length=20, min_length=3, error_messages={
+        'required': '学院不能为空',
+        'max_length': '学院不能超过20个字符',
+        'min_length': '学院不能少于3个字符',
+    })
+    school_id = forms.CharField(max_length=20, min_length=3, error_messages={
+        'required': '学号不能为空',
+        'max_length': '学号不能超过20个字符',
+        'min_length': '学号不能少于3个字符',
+    })
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
