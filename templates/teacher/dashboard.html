@@ -1,119 +1,52 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
-{% block head %}
-       <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>教师工作台 - 实验课程管理系统</title>
-    <link href="{% static 'bootstrap-5.0.2/css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
-<style>
-    .side-nav {
-        width: 280px;
-        height: 100vh;
-        position: fixed;
-        border-right: 1px solid #dee2e6;
-    }
-    .main-content {
-        margin-left: 280px;
-        padding: 20px;
-    }
-    .stat-card {
-        transition: all 0.3s;
-    }
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15)!important;
-    }
-</style>
-{% endblock %}
+{% block title %}教师工作台{% endblock %}
 
 {% block content %}
-    <nav class="side-nav bg-light p-3">
-    <h4 class="mb-4"><i class="fas fa-chalkboard-teacher"></i> 教师工作台</h4>
-    <div class="list-group">
-        <a href="#course" class="list-group-item list-group-item-action"><i class="fas fa-book"></i> 课程管理</a>
-        <a href="#questions" class="list-group-item list-group-item-action"><i class="fas fa-question-circle"></i> 习题管理</a>
-        <a href="#reports" class="list-group-item list-group-item-action"><i class="fas fa-file-alt"></i> 实验报告</a>
-    </div>
-</nav>
+    <div class="container mt-4">
+        <!-- 创建课程按钮和欢迎语 -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>教师工作台</h2>
+            <h2>欢迎，{{ user.username }}老师</h2>
+            <a href="{% url 'teacher:go_to_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> 创建新课程
+            </a>
+        </div>
 
-<!-- 主内容区 -->
-<div class="main-content">
-    <!-- 个人主页 -->
-    <section id="home">
+        <!-- 课程列表 -->
+<!-- 课程列表 -->
         <div class="row">
-            <!-- 个人信息 -->
-            <div class="col-md-4">
-                <div class="card stat-card">
-                    <div class="card-body">
-                        <h5><i class="fas fa-user"></i> 教师信息</h5>
-                        <p>姓名：张老师<br>院系：化学实验中心</p>
-                    </div>
+            {% for course in courses %}
+                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <a href="?course_id={{ course.course_id }}" class="text-decoration-none flex-grow-1 me-2 text-dark">
+                        {{ course.name }}
+                    </a>
+                    <a href="{% url 'teacher:edit' course.course_id %}"
+                       class="badge bg-secondary text-decoration-none">
+                        课程管理
+                    </a>
                 </div>
-            </div>
-
-            <!-- 课程推荐 -->
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header"><i class="fas fa-lightbulb"></i> 智能推荐课程资源</div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6>最新教学视频</h6>
-                                        <button class="btn btn-sm btn-primary">查看详情</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- 更多推荐 -->
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
-    </section>
 
-    <!-- 课程管理 -->
-    <section id="course" class="mt-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="fas fa-book"></i> 实验课程管理</span>
-                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#createCourseModal">
-                    <i class="fas fa-plus"></i> 新建课程
-                </button>
-            </div>
-            <div class="card-body">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>课程名称</th>
-                            <th>学生人数</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>基础化学实验</td>
-                            <td>45</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary">管理</button>
-                                <button class="btn btn-sm btn-info">发布签到</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-</div>
+    </div>
+{% endblock %}
 
-<!-- 新建课程模态框 -->
-<div class="modal fade" id="createCourseModal">
-    <!-- 模态框内容 -->
-</div>
+{% block head %}
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <style>
+        .course-card {
+            transition: transform 0.2s;
+        }
 
+        .course-card:hover {
+            transform: translateY(-3px);
+        }
 
-
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+    </style>
 {% endblock %}

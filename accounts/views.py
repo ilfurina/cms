@@ -94,3 +94,4 @@ def send_email_captcha(request):
 
     send_mail("注册验证码", message=f"您的验证码是:{captcha}", recipient_list=[email], from_email=None)
     return JsonResponse({"code": 200, "message": "验证码发送成功"})
+

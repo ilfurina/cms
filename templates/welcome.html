@@ -282,6 +282,11 @@
                                  width="32" height="32" class="rounded-circle">
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">  <!-- 添加 dropdown-menu-end 使下拉右对齐 -->
+                            {% if request.user.user_type == 'student' %}
+                                <li><a class="dropdown-item" href="{% url 'student:dashboard' %}">工作台</a></li>
+                            {% elif request.user.user_type == 'teacher' %}
+                                <li><a class="dropdown-item" href="{% url 'teacher:dashboard' %}">工作台</a></li>
+                            {% endif %}
                             <li><a class="dropdown-item" href='/info/'>个人信息</a></li>
                             <li><a class="dropdown-item" href="#">设置</a></li>
                             <li>

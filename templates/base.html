@@ -59,9 +59,16 @@
                         <img src="{% static '/img/elysia2.png' %}" alt="mdo" width="32" height="32" class="rounded-circle">
                     </a>
                     <ul class="dropdown-menu text-small">
+                        {% if request.user.user_type == 'student' %}
+                            <li><a class="dropdown-item" href="{% url 'student:dashboard' %}">工作台</a></li>
+                        {% elif request.user.user_type == 'teacher' %}
+                            <li><a class="dropdown-item" href="{% url 'teacher:dashboard' %}">工作台</a></li>
+                        {% endif %}
                         <li><a class="dropdown-item" href='/info/'>个人信息</a></li>
                         <li><a class="dropdown-item" href="#">设置</a></li>
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
                         <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">退出登录</a></li>
                     </ul>
                 </div>
@@ -76,4 +83,6 @@
   </div>
 
 {% block content %}{% endblock %}
+{% block extra_js %}
+{% endblock %}
 </body>
