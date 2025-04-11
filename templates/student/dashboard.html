@@ -1,92 +1,67 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
+{% block title %}学生工作台{% endblock %}
 
 {% block head %}
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生工作台 - 实验课程管理系统</title>
-    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
-<style>
-    .side-nav {
-        width: 280px;
-        height: 100vh;
-        position: fixed;
-        border-right: 1px solid #dee2e6;
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+<style>    .card {
+        border-radius: 0.75rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
     }
-    .main-content {
-        margin-left: 280px;
-        padding: 20px;
-    }
-    .stat-card {
-        transition: all 0.3s;
-    }
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15)!important;
+    input[type="text"]:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
     }
 </style>
 {% endblock %}
+
 {% block content %}
-
-<!-- 侧边导航 -->
-<nav class="side-nav bg-light p-3">
-    <h4 class="mb-4"><i class="fas fa-user-graduate"></i> 学生工作台</h4>
-    <div class="list-group">
-        <a href="#" class="list-group-item list-group-item-action"><i class="fas fa-book-open"></i> 我的课程</a>
-        <a href="#" class="list-group-item list-group-item-action"><i class="fas fa-file-upload"></i> 实验报告</a>
-        <a href="#" class="list-group-item list-group-item-action"><i class="fas fa-edit"></i> 在线考试</a>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>学生工作台</h2>
+        <h2>欢迎，{{ user.username }}同学</h2>
     </div>
-</nav>
 
-<div class="main-content">
-    <!-- 个人主页 -->
-    <section id="home">
-        <div class="row">
-            <!-- 学习统计 -->
-            <div class="col-md-6">
-                <div class="card stat-card">
-                    <div class="card-body">
-                        <h5><i class="fas fa-chart-line"></i> 学习统计</h5>
-                        <div class="progress mb-2">
-                            <div class="progress-bar" style="width: 75%">课程进度 75%</div>
-                        </div>
-                        <p>累计学习时长：36小时</p>
-                    </div>
+    <!-- 加入课程表单 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="post" action="{% url 'student:join_course' %}">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" name="course_id"
+                           class="form-control"
+                           placeholder="输入6位课程码"
+                           pattern="\d{6}"
+                           maxlength="6"
+                           required>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i> 加入课程
+                    </button>
                 </div>
-            </div>
-
-            <!-- 成绩分析 -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5><i class="fas fa-chart-pie"></i> 成绩分布</h5>
-                        <canvas id="scoreChart" style="height: 150px;"></canvas>
-                    </div>
-                </div>
-            </div>
+            </form>
         </div>
-    </section>
+    </div>
 
-    <!-- 我的课程 -->
-    <section id="courses" class="mt-4">
-        <div class="card">
-            <div class="card-header"><i class="fas fa-book"></i> 已选课程</div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5>基础化学实验</h5>
-                                <button class="btn btn-sm btn-primary">进入学习</button>
-                                <button class="btn btn-sm btn-success">课程签到</button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- 更多课程 -->
-                </div>
-            </div>
+    <!-- 已加入课程列表 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">已选课程</h5>
         </div>
-    </section>
+        <div class="list-group list-group-flush">
+            {% for course in enrolled_courses %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1">{{ course.name }}</h6>
+                    <small class="text-muted">课程ID：{{ course.course_id }}</small>
+                </div>
+                <span class="badge bg-primary rounded-pill">{{ course.numbers }}人</span>
+            </div>
+            {% empty %}
+            <div class="list-group-item text-center text-muted py-4">
+                尚未加入任何课程
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
-
 {% endblock %}

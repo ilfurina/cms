@@ -30,9 +30,9 @@ def mylogin(request):
             if user and user.check_password(password):
                 login(request, user)
                 if user.user_type == 'teacher':
-                    return render(request,'teacher/dashboard.html')
+                    return redirect('teacher:dashboard')
                 if user.user_type == 'student':
-                    return render(request,'student/dashboard.html')
+                    return redirect('student:dashboard')
                 if user.user_type == 'admin':
                     return render(request,'')
 

@@ -15,7 +15,7 @@ class Teacher(models.Model):
 
 
 class Course(models.Model):
-    course_id = models.AutoField(primary_key=True)
+    course_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
     description = models.TextField()#课程描述
     numbers = models.IntegerField(default=0)#班级人数，创建初始只有老师一人
@@ -25,8 +25,8 @@ class Course(models.Model):
         related_name='course'  # 允许通过teacher.courses反向查询
     )
     students = models.ManyToManyField(
-        Student,
-        related_name='enrolled_course',  # 允许通过student.enrolled_courses反向查询
+        'student.Student',
+        related_name='courses',  # 允许通过student.courses反向查询
         # through='Enrollment',
         blank=True  # 允许课程没有学生
     )
