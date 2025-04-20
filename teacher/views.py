@@ -1,10 +1,12 @@
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
-
 from accounts.decorators import teacher_required
 import random
+
+from sys_admin.models import Major, College
 from .models import Course, Attendance
 from django.shortcuts import render
+
 
 
 @teacher_required
@@ -23,22 +25,39 @@ def info(request):
     return render(request, 'teacher/info.html', {'information': information})
 
 #教师创建课程
+# teacher/views.py
 def go_to_create(request):
-    return render(request, 'teacher/create_course.html')
+    # 当前用户所属学院的全部专业
+    if request.user.teacher.college:
+        college = request.user.teacher.college
+        majors = Major.objects.filter(college=college)
+    return render(request, 'teacher/create_course.html', {'majors': majors})
+
 def create_course(request):
     if request.method == 'POST':
 
         name = request.POST.get('name')
-    #     随机产生一个6位的数字作为课程码，且与数据库中的课程码不重复
+        major_name = request.POST.get('major')
+        major = Major.objects.get(major_name=major_name)
+        major_id = major.major_id
+        college_id = major.college.college_id
+        print('学院id', college_id,'专业id',major_id)
+        # 课程码为 学院id+专业id+三位随机数
         while True:
-            course_id = random.randint(100000, 999999)
+            ran = random.randint(100, 999)
+            course_id = college_id + major_id + str(ran)
             if Course.objects.filter(course_id=course_id).count() == 0:
                 break
         description = request.POST.get('description')
         teacher = request.user.teacher
-        Course.objects.create(course_id=course_id, name=name, description=description, teacher=teacher)
+        Course.objects.create(
+            major=major,
+            course_id=course_id,
+            name=name,
+            description=description,
+            teacher=teacher)
         return redirect('teacher:dashboard')
-    return redirect('teacher:go_to_create')
+    # return redirect('teacher:go_to_create')
 
 # 编辑课程
 def edit_course(request, course_id):

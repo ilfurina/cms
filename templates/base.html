@@ -15,6 +15,7 @@
     <script src="{% static 'bootstrap-5.0.2/js/bootstrap.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
 
+
     <style>
         .carousel-inner img {
             width: 100%;
@@ -63,6 +64,8 @@
                             <li><a class="dropdown-item" href="{% url 'student:dashboard' %}">工作台</a></li>
                         {% elif request.user.user_type == 'teacher' %}
                             <li><a class="dropdown-item" href="{% url 'teacher:dashboard' %}">工作台</a></li>
+                        {% elif request.user.user_type == 'admin' %}
+                            <li><a class="dropdown-item" href="{% url 'admin:dashboard' %}">工作台</a></li>
                         {% endif %}
                         <li><a class="dropdown-item" href='/info/'>个人信息</a></li>
                         <li><a class="dropdown-item" href="#">设置</a></li>
@@ -72,13 +75,11 @@
                         <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">退出登录</a></li>
                     </ul>
                 </div>
+        {% else %}
+                <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary me-2">登录</a>
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary">注册</a>
         {% endif %}
 
-{#      <ul class="nav nav-pills">#}
-{#        <li class="nav-item"><a href="/myauth/login/" class="nav-link">登录</a></li>#}
-{#        <li class="nav-item"><a href="/myauth/register/" class="nav-link">注册</a></li>#}
-{#      </ul>#}
-{#        #}
     </header>
   </div>
 

@@ -5,14 +5,14 @@ from django import forms
 
 # User = get_user_model()
 
-from myauth.models import CaptchaModel
+from .models import CaptchaModel
 
 
 class RegisterForm(forms.Form):
-    username = forms.CharField(max_length=20, min_length=3, error_messages={
+    username = forms.CharField(max_length=20, min_length=2, error_messages={
         'required': '用户名不能为空',
         'max_length': '用户名不能超过20个字符',
-        'min_length': '用户名不能少于3个字符',
+        'min_length': '用户名不能少于2个字符',
     })
     email = forms.EmailField(error_messages={
         'required': '邮箱不能为空',

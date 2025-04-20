@@ -12,7 +12,7 @@ $(function () {
 
             //发送ajax请求
             $.ajax(
-                "/myauth/captcha?email="+email,{
+                "/accounts/captcha?email="+email,{
                     method: "GET",
                     success: function (result) {
                         if (result['code'] == 200){

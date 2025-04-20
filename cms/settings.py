@@ -40,9 +40,9 @@ INSTALLED_APPS = [
     # 'classes.apps.ClassesConfig',
     'student.apps.StudentConfig',
     'teacher.apps.TeacherConfig',
-    'myauth.apps.MyauthConfig',
     'accounts',
-    'course.apps.CourseConfig'
+    # 'course.apps.CourseConfig',
+    'sys_admin.apps.SysAdminConfig'
 ]
 
 MIDDLEWARE = [

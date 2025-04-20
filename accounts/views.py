@@ -4,6 +4,8 @@ import string
 import random
 from django.core.mail import send_mail
 from django.urls import reverse
+
+from sys_admin.models import College
 from .models import User
 from .models import CaptchaModel
 from django.views.decorators.http import require_http_methods
@@ -34,7 +36,7 @@ def mylogin(request):
                 if user.user_type == 'student':
                     return redirect('student:dashboard')
                 if user.user_type == 'admin':
-                    return render(request,'')
+                    return redirect('admin:dashboard')
 
                 if not remember:
                     # 如果没有选择记住我，则设置session过期时间为0
@@ -65,22 +67,23 @@ def register(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             user_type = form.cleaned_data.get('user_type')
-            college = form.cleaned_data.get('college')
+
+            college_name = form.cleaned_data.get('college')
+            college = College.objects.get(college_name=college_name)
+
             school_id = form.cleaned_data.get('school_id')
 
-            print(user_type)
             user =  User.objects.create_user(email=email, username=username, password=password, user_type=user_type)
             login(request, user)
             if user.user_type == 'teacher':
-
                 Teacher.objects.create(teacher_id=school_id, name=user.username,college=college, user=user)
                 return redirect('teacher:dashboard')
-            else:
+            if user.user_type == 'student':
                 Student.objects.create(student_id=school_id, name=user.username,college=college,user = user)
                 return redirect('student:dashboard')
+
         else:
-            print(form.errors)
-            return redirect(reverse('myauth:register'))
+            return render(request,'register.html', context={'form': form})
 
 
 def send_email_captcha(request):

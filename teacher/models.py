@@ -1,8 +1,8 @@
 import random
-
 from django.db import models
 from accounts.models import User
 from student.models import Student
+from sys_admin.models import Major,College
 
 
 # 教师创建课程，学生可加入课程，教师可以在课程中发布实验、作业、考试等
@@ -10,8 +10,8 @@ class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,null=True, blank=True)
     teacher_id = models.CharField(max_length=100, primary_key=True) #教师工号
     name = models.CharField(max_length=100)  #用户姓名
-    college = models.CharField(max_length=100,null=True, blank=True)#学院
-    # user_type = models.CharField(max_length=10, default='teacher') #这字段没必要啊
+    college = models.ForeignKey(College, on_delete=models.CASCADE,null=True, blank=True)#学院
+
 
 
 class Course(models.Model):
@@ -29,6 +29,11 @@ class Course(models.Model):
         related_name='courses',  # 允许通过student.courses反向查询
         # through='Enrollment',
         blank=True  # 允许课程没有学生
+    )
+    major = models.ForeignKey(
+        'sys_admin.Major',
+        on_delete=models.CASCADE,
+        related_name='courses',  # 允许通过major.courses反向查询
     )
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)

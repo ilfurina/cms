@@ -18,15 +18,12 @@ from django.contrib import admin
 from django.urls import path, include
 from cms import views
 
-
 urlpatterns = [
 
     path('', views.welcome),
-    # path('teacher/home/',teacherviews.teacher_home, name='teacher/home/'),
-    path('myauth/', include('myauth.urls')),
     path('accounts/', include('accounts.urls')),
     path('teacher/', include('teacher.urls')),
     path('student/', include('student.urls')),
-    path('course/', include('course.urls')),
     path('info/', views.info,name='info'),
+    path('admin/',include('sys_admin.urls')),
 ]
