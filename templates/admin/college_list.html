@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block tittle %}学院管理{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>学院列表</h2>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCollegeModal">
+                <i class="bi bi-plus-lg"></i> 添加学院
+            </button>
+        </div>
+
+        <!-- 学院表格 -->
+        <div class="card shadow">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th class="ps-4 border-end">学院名称</th>
+                            <th class="text-end pe-4" style="width: 120px;">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for college in colleges %}
+                            <tr>
+                                <td class="ps-4 border-end">{{ college.college_name }}</td>  <!-- 添加右边框 -->
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editCollegeModal"
+                                            data-id="{{ college.college_id }}">
+                                        <a href="{% url 'admin:major_list' college.college_id %}">编辑</a>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加学院模态框 -->
+    <div class="modal fade" id="addCollegeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" action="{% url 'admin:create_college' %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title">添加新学院</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">学院名称</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">学院id</label>
+                            <input type="text" name="college_id" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+    <style>
+/* 强化分割线样式 */
+.border-end {
+    border-right: 2px solid #adb5bd !important;  /* 加深颜色并加粗 */
+}
+
+/* 调整表头边框颜色 */
+.table-light th.border-end {
+    border-right-color: #ced4da !important;  /* 比内容稍浅但保持可见 */
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .border-end {
+        border-right-width: 1px;  /* 小屏幕适当减细 */
+    }
+}
+
+/* 保持原有样式 */
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+.table th, .table td {
+    vertical-align: middle;
+}
+.text-end {
+    padding-right: 1.5rem;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        // 编辑模态框数据加载
+        document.getElementById('editCollegeModal').addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget
+            const collegeId = button.getAttribute('data-id')
+            const form = this.querySelector('form')
+            form.action = `/admin/college/${collegeId}/edit/`  // 根据实际路由调整
+
+            // 此处应通过AJAX获取学院数据
+            // fetch(`/api/college/${collegeId}/`)
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         form.querySelector('input[name="name"]').value = data.name
+            //         form.querySelector('textarea[name="description"]').value = data.description
+            //     })
+        })
+    </script>
+{% endblock %}

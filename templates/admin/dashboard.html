@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}管理员工作台{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">管理员工作台</h2>
+
+    <div class="row g-4">
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">🏢 学院管理</h5>
+                    <p class="card-text">添加修改学院、专业信息</p>
+                    <a href="/admin/college_list/" class="btn btn-primary">进入管理</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实验室新闻管理 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">📰 实验室新闻管理</h5>
+                    <p class="card-text">管理实验室新闻的发布、编辑和删除操作，维护最新动态</p>
+                    <a href="#" class="btn btn-primary">进入管理</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 通知公告管理 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">📢 通知公告管理</h5>
+                    <p class="card-text">发布和管理系统公告，设置重要通知的置顶状态</p>
+                    <a href="#" class="btn btn-primary">进入管理</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 轮播图管理 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">🖼️ 轮播图管理</h5>
+                    <p class="card-text">管理首页轮播图，设置展示顺序和跳转链接</p>
+                    <a href="#" class="btn btn-primary">进入管理</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实验课程资源管理 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">📚 实验课程资源</h5>
+                    <p class="card-text">管理课件、视频、图书文献等教学资源，支持分类管理</p>
+                    <a href="#" class="btn btn-primary">进入管理</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 课程思政资源管理 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">🇨🇳 思政资源管理</h5>
+                    <p class="card-text">维护思政案例库和视频资源，设置课程思政关联</p>
+                    <a href="#" class="btn btn-primary">进入管理</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 资源审核 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">✅ 资源审核</h5>
+                    <p class="card-text">审核教师提交的课程资源，查看待审列表</p>
+                    <a href="#" class="btn btn-warning">待审项目
+                        <span class="badge bg-danger">3</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 论坛管理 -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">💬 课程论坛管理</h5>
+                    <p class="card-text">管理讨论板块，处理举报内容，维护交流秩序</p>
+                    <a href="#" class="btn btn-primary">进入管理</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s;
+        border-radius: 15px;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-title {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    .btn-primary {
+        background-color: #3498db;
+        border: none;
+        padding: 8px 20px;
+    }
+    .btn-warning {
+        background-color: #f1c40f;
+        color: #2c3e50;
+    }
+</style>
+{% endblock %}
