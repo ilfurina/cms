@@ -26,7 +26,7 @@
                         <tbody>
                         {% for major in majors %}
                             <tr>
-                                <td class="ps-4 border-end">{{ major.major_name }}</td>  <!-- 添加右边框 -->
+                                <td class="ps-4 border-end">{{ major.major_id }}{{ major.major_name }}</td>  <!-- 添加右边框 -->
                                 <td class="text-end pe-4">
                                     <button class="btn btn-sm btn-outline-primary"
                                             data-bs-toggle="modal"

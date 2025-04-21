@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-<html lang="zh-CN">
-{#<head>#}
+
     {% block head %}
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -91,63 +90,67 @@
 <!-- 主要内容 -->
 <div class="container news-section">
     <div class="row g-4">
-        <!-- 左侧内容 -->
-        <div class="col-lg-8">
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">实验室新闻</h5>
-                        </div>
-                        <div class="list-group list-group-flush">
-                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                2024年实验室开放安排
-                                <span class="badge bg-primary">新</span>
-                            </a>
-                            <a href="#" class="list-group-item list-group-item-action">新设备操作培训通知</a>
-                            <a href="#" class="list-group-item list-group-item-action">优秀实验成果展示</a>
-                            <a href="#" class="list-group-item list-group-item-action">----------</a>
-                        </div>
-                    </div>
+        <!-- 左侧新闻 -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-newspaper me-2"></i>实验室新闻
+                    </h5>
                 </div>
-                <div class="col-md-6">
-                    <div class="card border-primary">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="card-title mb-0">通知公告</h5>
-                        </div>
-                        <div class="list-group list-group-flush">
-                            <a href="#" class="list-group-item list-group-item-action">暑期实验室安全注意事项</a>
-                            <a href="#" class="list-group-item list-group-item-action">实验报告提交时间调整</a>
-                            <a href="#" class="list-group-item list-group-item-action">新实验课程上线通知</a>
-                            <a href="#" class="list-group-item list-group-item-action">----------</a>
-                        </div>
-                    </div>
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        2024年实验室开放安排
+
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">新设备操作培训通知</a>
+                    <a href="#" class="list-group-item list-group-item-action">优秀实验成果展示</a>
+                    <a href="#" class="list-group-item list-group-item-action">----------</a>
                 </div>
             </div>
         </div>
 
-        <!-- 右侧侧边栏 -->
-<div class="col-lg-4">
-    <!-- 智能推荐 -->
-    <div class="side-card">
-        <div class="card-body">
-            <h5 class="card-title">智能推荐</h5>
-            <img src="https://placehold.co/600x400" class="recommend-img w-100 rounded" alt="推荐内容">
-        </div>
-    </div>
-
-    <!-- 思政课程资源 -->
-    <div class="side-card">
-        <div class="card-body">
-            <h5 class="card-title">思政课程资源</h5>
-            <ul class="list-unstyled mb-0">
-                <li class="mb-2">科学家精神讲座</li>
-                <li class="mb-2">实验伦理规范</li>
-                <li>学科发展史专题</li>
-            </ul>
+        <!-- 右侧公告 -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-megaphone me-2"></i>通知公告
+                    </h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action">暑期实验室安全注意事项</a>
+                    <a href="#" class="list-group-item list-group-item-action">实验报告提交时间调整</a>
+                    <a href="#" class="list-group-item list-group-item-action">新实验课程上线通知</a>
+                    <a href="#" class="list-group-item list-group-item-action">----------</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+        <!-- 右侧侧边栏 -->
+{#<div class="col-lg-4">#}
+{#    <!-- 智能推荐 -->#}
+{#    <div class="side-card">#}
+{#        <div class="card-body">#}
+{#            <h5 class="card-title">智能推荐</h5>#}
+{#            <img src="https://placehold.co/600x400" class="recommend-img w-100 rounded" alt="推荐内容">#}
+{#        </div>#}
+{#    </div>#}
+{##}
+{#    <!-- 思政课程资源 -->#}
+{#    <div class="side-card">#}
+{#        <div class="card-body">#}
+{#            <h5 class="card-title">思政课程资源</h5>#}
+{#            <ul class="list-unstyled mb-0">#}
+{#                <li class="mb-2">科学家精神讲座</li>#}
+{#                <li class="mb-2">实验伦理规范</li>#}
+{#                <li>学科发展史专题</li>#}
+{#            </ul>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
 
 <!-- 链接 -->
         <div class="footer-links mt-auto">
@@ -165,7 +168,6 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
+
 
 {% endblock %}

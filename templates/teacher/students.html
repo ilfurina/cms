@@ -1,0 +1,44 @@
+{% extends "teacher/course_edit.html" %}
+{% load static %}
+{% block option %}
+    <div class="tab-content">
+        <div class="tab-pane fade show active">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">学生列表</h6>
+                <a href="{% url 'teacher:export_students' current_course.course_id %}"
+                   class="btn btn-sm btn-primary">
+                    <i class="bi bi-download"></i> 导出名单
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>学号</th>
+                        <th>姓名</th>
+                        <th>班级</th>
+                        <th>学院</th>
+                        <th>加入时间</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for enrollment in current_course.students.all %}
+                        <tr>
+                            <td>{{ enrollment.student_id }}</td>
+                            <td>{{ enrollment.name }}</td>
+                            <td>{{ enrollment.class_id|default:"未填写" }}</td>
+                            <td>{{ enrollment.college|default:"未填写" }}</td>
+                            <td>{{ enrollment.enrollment_date|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">暂无学生加入</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

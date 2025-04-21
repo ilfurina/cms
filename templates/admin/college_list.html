@@ -26,7 +26,7 @@
                         <tbody>
                         {% for college in colleges %}
                             <tr>
-                                <td class="ps-4 border-end">{{ college.college_name }}</td>  <!-- 添加右边框 -->
+                                <td class="ps-4 border-end">{{ college.college_id }}{{ college.college_name }}</td>  <!-- 添加右边框 -->
                                 <td class="text-end pe-4">
                                     <button class="btn btn-sm btn-outline-primary"
                                             data-bs-toggle="modal"
@@ -76,7 +76,7 @@
 
 
     <style>
-/* 强化分割线样式 */
+/* 分割线样式 */
 .border-end {
     border-right: 2px solid #adb5bd !important;  /* 加深颜色并加粗 */
 }

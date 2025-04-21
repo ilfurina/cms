@@ -3,6 +3,7 @@ from django.db import models
 from accounts.models import User
 from student.models import Student
 from sys_admin.models import Major,College
+import os
 
 
 # 教师创建课程，学生可加入课程，教师可以在课程中发布实验、作业、考试等
@@ -56,4 +57,17 @@ class Attendance(models.Model):
         self.checkin_code = str(random.randint(1000, 9999))
         return self.checkin_code
 
+
+class CourseResource(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='resources')
+    file = models.FileField(upload_to='course_resources/%Y/%m/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def filename(self):
+        return os.path.basename(self.file.name)
+
+    @property
+    def file_extension(self):
+        return self.filename.split('.')[-1] if '.' in self.filename else ''
 

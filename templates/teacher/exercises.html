@@ -1,0 +1,22 @@
+{% extends "teacher/course_edit.html" %}
+{% load static %}
+{% block option %}
+    <div class="tab-pane fade" id="exercises">
+        <div class="p-3">
+            <form method="post" action="#">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">习题发布</label>
+                    <textarea name="exercise_description"
+                              class="form-control"
+                              rows="3"
+                              placeholder="请输入习题描述"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-journal-text"></i> 发布习题
+                </button>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

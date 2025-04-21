@@ -1,0 +1,21 @@
+{% extends "teacher/course_edit.html" %}
+{% load static %}
+{% block option %}
+    <div class="tab-pane fade" id="reports">
+        <div class="p-3">
+            <form method="post" action="#">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">实验报告要求</label>
+                    <textarea name="report_description"
+                              class="form-control"
+                              rows="3"
+                              placeholder="请输入实验报告描述"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-folder2-open"></i> 发布报告
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

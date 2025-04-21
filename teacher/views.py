@@ -2,11 +2,11 @@ from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from accounts.decorators import teacher_required
 import random
-
 from sys_admin.models import Major, College
-from .models import Course, Attendance
+from .models import Course, Attendance, CourseResource
 from django.shortcuts import render
-
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+import csv
 
 
 @teacher_required
@@ -81,11 +81,15 @@ def edit_course(request, course_id):
         course.save()
         return redirect('teacher:dashboard')
 
+    course = get_object_or_404(Course, course_id=course_id)
+    resources = CourseResource.objects.filter(course=course)  # 资源查询
+
     # 传递current_attendance到模板
     return render(request, 'teacher/course_edit.html', {
         'current_course': course,
         'current_attendance': current_attendance,
-        'remaining_seconds': remaining_seconds
+        'remaining_seconds': remaining_seconds,
+        'resources': resources,
     })
 
 
@@ -126,5 +130,81 @@ def create_attendance(request, course_id):
         attendance.save()
         return redirect('teacher:edit', course_id=course_id)
 
-    return render(request, 'teacher/attendance_form.html', {'course': course})
+    # return render(request, 'teacher/attendance_form.html', {'course': course})
 
+
+def export_students(request, course_id):
+    course = get_object_or_404(Course, course_id=course_id)
+    students = course.students.all()
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{course.name}_学生名单.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['学号', '姓名', '学院', '专业'])
+
+    for student in students:
+        writer.writerow([
+            student.student_id,
+            student.name,
+            student.college,
+            student.class_id
+        ])
+
+    return response
+
+
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+
+# 上传课程资源
+@login_required
+@require_POST
+def upload_resource(request, course_id):
+    course = get_object_or_404(Course, course_id=course_id)
+
+    if 'resource_file' not in request.FILES:
+        return HttpResponseBadRequest("未选择文件")
+
+    uploaded_file = request.FILES['resource_file']
+    # 文件大小限制（10MB）
+    if uploaded_file.size > 100 * 1024 * 1024:
+        return HttpResponseBadRequest("文件大小超过100MB限制")
+
+    # 创建资源记录
+    resource = CourseResource(course=course, file=uploaded_file)
+    resource.save()
+
+    return redirect('teacher:resources', course_id=course_id)
+
+# 删除课程资源
+@login_required
+@require_POST
+def delete_resource(request, resource_id):
+    resource = get_object_or_404(CourseResource, id=resource_id)
+    course_id = resource.course.course_id
+    resource.file.delete()  # 删除文件
+    resource.delete()  # 删除记录
+    return redirect('teacher:resources', course_id=course_id)
+
+# 六个选项卡
+def students(request, course_id):
+    course = get_object_or_404(Course, course_id=course_id)
+    students = course.students.all()
+    return render(request, 'teacher/students.html', {'current_course': course, 'students': students})
+def resources(request, course_id):
+    course = get_object_or_404(Course, course_id=course_id)
+    resources = CourseResource.objects.filter(course=course)
+    return render(request, 'teacher/resources.html',
+                  {'current_course': course, 'resources': resources})
+
+def attendance(request, course_id):
+    course = get_object_or_404(Course, course_id=course_id)
+    attendances = Attendance.objects.filter(course=course)
+    return render(request, 'teacher/attendance.html',
+          {'current_course': course, 'attendances': attendances})
+
+# def exercises(request, course_id):
+#     course = get_object_or_404(Course, course_id=course_id)
+#     exercises = Exercise.objects.filter(course=course)
+#     return render(request, 'teacher/exercises.html', {'course': course, 'exercises': exercises})
