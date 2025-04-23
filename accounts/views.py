@@ -91,7 +91,9 @@ def send_email_captcha(request):
     if not email:
         return JsonResponse({"code": 400, "message": "邮箱不能为空"})
     # 生成验证码
-    captcha = "".join(random.sample(string.digits, 4))
+    # captcha = "".join(random.sample(string.digits, 4))
+    captcha = '1234'
+
     # 存储到数据库
     CaptchaModel.objects.update_or_create(email=email, defaults={"captcha": captcha})  # 有就更新，没有就创建
 

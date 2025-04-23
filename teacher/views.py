@@ -45,7 +45,7 @@ def create_course(request):
         # 课程码为 学院id+专业id+三位随机数
         while True:
             ran = random.randint(100, 999)
-            course_id = college_id + major_id + str(ran)
+            course_id =  major_id + str(ran)
             if Course.objects.filter(course_id=course_id).count() == 0:
                 break
         description = request.POST.get('description')

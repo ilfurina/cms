@@ -17,9 +17,9 @@ class College(models.Model):
 
 # 学院的下设专业
 class Major(models.Model):
-    major_id = models.CharField(max_length=2,primary_key=True)
+    major_id = models.CharField(max_length=5,primary_key=True) #专业id由三位学院id+两位专业id组成
     major_name = models.CharField(max_length=15,unique=True)
-    college = models.ForeignKey(College, on_delete=models.CASCADE)
+    college = models.ForeignKey(College,on_delete=models.CASCADE)
 
     def __str__(self):
         return self.major_name

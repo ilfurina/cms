@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}编辑个人信息{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">编辑个人信息</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">姓名</label>
+                        <input type="text" name="name"
+                               value="{{ student.name }}"
+                               class="form-control">
+                    </div>
+
+                    {#                <div class="mb-3">#}
+                    {#                    <label class="form-label">学院</label>#}
+                    {#                    <select name="college" class="form-select">#}
+                    {#                        {% for college in colleges %}#}
+                    {#                            <option value="{{ college.id }}"#}
+                    {#                                {% if college.id == student.college.id %}selected{% endif %}>#}
+                    {#                                {{ college.name }}#}
+                    {#                            </option>#}
+                    {#                        {% endfor %}#}
+                    {#                    </select>#}
+                    {#                </div>#}
+
+                    <div class="mb-3">
+                        <label class="form-label">专业</label>
+                        <select name="major" class="form-select">
+                            {% for major in majors %}
+                                <option value="{{ major.major_id }}"
+                                        {% if major.major_id == student.major.major_id %}selected{% endif %}>
+                                    {{ major.major_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">保存修改</button>
+                        <a href="{% url 'student:info' %}" class="btn btn-secondary">取消</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

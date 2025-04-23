@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from accounts.decorators import student_required
 from django.contrib import messages
 from teacher.models import Course
+from sys_admin.models import College, Major
+
 
 @student_required
 def dashboard(request):
@@ -16,12 +18,40 @@ def info(request):
         'name': user.name,
         'student_id': user.student_id,
         'college': user.college,
-        'class_id': user.class_id,
+        'major': user.major,
+        # 'class_id': user.class_id,
     }
     return render(request, 'student/info.html', {'information': information})
 
 
+from django.contrib.auth.decorators import login_required
+from .models import Student
+from django.shortcuts import get_object_or_404
 
+
+@student_required
+def edit_info(request):
+    student = get_object_or_404(Student, user=request.user)
+
+    if request.method == 'POST':
+        # 更新可修改字段（示例字段，根据实际需求调整）
+        major_id = request.POST.get('major')
+        try:
+            student.major = Major.objects.get(major_id=major_id)
+            student.save()
+            messages.success(request, '信息更新成功')
+        except Major.DoesNotExist:
+            messages.error(request, '无效的专业选择')
+        return redirect('student:info')
+
+
+    college = student.college
+    majors = college.major_set.all()
+
+    return render(request, 'student/edit_info.html', {
+        'student': student,
+        'majors': majors,
+    })
 
 
 @student_required
