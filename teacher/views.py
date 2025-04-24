@@ -204,7 +204,85 @@ def attendance(request, course_id):
     return render(request, 'teacher/attendance.html',
           {'current_course': course, 'attendances': attendances})
 
-# def exercises(request, course_id):
-#     course = get_object_or_404(Course, course_id=course_id)
-#     exercises = Exercise.objects.filter(course=course)
-#     return render(request, 'teacher/exercises.html', {'course': course, 'exercises': exercises})
+
+from django.views import View
+from django.shortcuts import get_object_or_404
+from teacher.models import (
+    Course,
+    QuestionBase,
+    SingleChoiceQuestion,
+    MultipleChoiceQuestion,
+    FillInBlankQuestion,
+    EssayQuestion,
+    Assignment,
+    AssignmentQuestion
+)
+
+
+class CreateAssignmentView(View):
+    def get(self, request, course_id):
+        course = get_object_or_404(Course, course_id=course_id)
+
+        # 获取所有子类题目（原生Django方式）
+        questions = QuestionBase.objects.filter(course=course).prefetch_related(
+            'singlechoicequestion',
+            'multiplechoicequestion',
+            'fillinblankquestion',
+            'essayquestion'
+        )
+
+        # 获取已选中的题目
+        selected = request.GET.getlist('selected')
+        selected_questions = QuestionBase.objects.filter(id__in=selected)
+
+        return render(request, 'teacher/create_exercises.html', {
+            'current_course': course,
+            'questions': questions,
+            'selected_questions': selected_questions
+        })
+
+    # post 方法保持不变...
+
+    def post(self, request, course_id):
+        course = get_object_or_404(Course, course_id=course_id)
+
+        # 创建作业
+        assignment = Assignment.objects.create(
+            course=course,
+            title=request.POST['title'],
+            description=request.POST.get('description', ''),
+            assignment_type='homework',
+            start_time=request.POST['start_time'],
+            end_time=request.POST['end_time']
+        )
+
+        # 关联题目
+        selected_questions = request.POST.getlist('questions')
+        for order, qid in enumerate(selected_questions, start=1):
+            question = QuestionBase.objects.get(id=qid)
+            AssignmentQuestion.objects.create(
+                assignment=assignment,
+                question=question,
+                points=10,  # 默认分值
+                order=order
+            )
+
+        return redirect('teacher:course_edit', course_id=course_id)
+
+
+from django.utils import timezone
+
+
+class ActiveAssignmentsView(View):
+    def get(self, request, course_id):
+        course = get_object_or_404(Course, course_id=course_id)
+        now = timezone.now()
+
+        # 获取所有任务并按状态分类
+        assignments = Assignment.objects.filter(course=course).order_by('-start_time')
+
+        return render(request, 'teacher/active_exercises.html', {
+            'current_course': course,
+            'assignments': assignments,
+            'now': now  # 传递当前时间到模板
+        })

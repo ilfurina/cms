@@ -3,14 +3,19 @@ from accounts.decorators import student_required
 from django.contrib import messages
 from teacher.models import Course
 from sys_admin.models import College, Major
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import View
+from .recommender import CourseRecommender
 
 
 @student_required
 def dashboard(request):
     student = request.user.student
-    enrolled_courses = student.courses.all()  # 假设Student模型有courses关联字段
+    enrolled_courses = student.courses.all()
+    recommended_courses = CourseRecommender.get_recommendations(student)
     return render(request, 'student/dashboard.html', {
-        'enrolled_courses': enrolled_courses
+        'enrolled_courses': enrolled_courses,
+        'recommended_courses': recommended_courses,
     })
 def info(request):
     user = request.user.student
@@ -74,3 +79,19 @@ def join_course(request):
 
     return redirect('student:dashboard')
 
+
+
+
+
+
+class CourseRecommendationsView(LoginRequiredMixin, View):
+
+    def get(self, request):
+        student = request.user.student  # 假设已建立用户到Student的关联
+        enrolled_courses = student.courses.all()
+        recommended_courses = CourseRecommender.get_recommendations(student)
+
+        return render(request, 'student/recommendations.html', {
+            'enrolled_courses':enrolled_courses,
+            'recommended_courses': recommended_courses,
+        })

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import CreateAssignmentView
 
 app_name = 'teacher'
 urlpatterns = [
@@ -16,6 +17,12 @@ urlpatterns = [
     path('attendance/<str:course_id>/', views.attendance, name='attendance'),
     path('resources/<str:course_id>/', views.resources, name='resources'),
     path('students/<str:course_id>/', views.students, name='students'),
-
+    # path('course/<int:course_id>/exercises/', CreateAssignmentView.as_view(), name='exercises'),
+    path('course/<int:course_id>/assignments/active/',
+         views.ActiveAssignmentsView.as_view(),
+         name='active_assignments'),
+    path('course/<int:course_id>/assignments/create/',
+         views.CreateAssignmentView.as_view(),
+         name='create_assignment'),
 
 ]

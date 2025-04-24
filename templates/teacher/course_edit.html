@@ -31,15 +31,16 @@
                                 <input type="text" name="name" value="{{ current_course.name }}"
                                        class="form-control form-control-sm" placeholder="课程名称">
                             </div>
-                            <div class="col-md-4">
-                        <textarea name="description"
-                                  class="form-control form-control-sm"
-                                  rows="1" placeholder="课程描述">{{ current_course.description }}</textarea>
+                            <div class="col-md-12 mt-2">  <!-- 修改这里 -->
+                                <textarea name="description"
+                                          class="form-control form-control-sm"
+                                          rows="3"
+                                          placeholder="课程描述">{{ current_course.description }}</textarea>
                             </div>
                             <div class="col-md-2">
-                                <button type="submit" class="btn btn-sm btn-primary w-100">
-                                    <i class="bi bi-save"></i> 保存更改
-                                </button>
+                                {#                                <button type="submit" class="btn btn-sm btn-primary w-100">#}
+                                {#                                    <i class="bi bi-save"></i> 保存更改#}
+                                {#                                </button>#}
                             </div>
                         </form>
                     </div>
@@ -62,30 +63,54 @@
                                    href="{% url 'teacher:attendance' current_course.course_id %}">
                                     <i class="bi bi-check2-square"></i> 发布签到
                                 </a>
-                                <a class="nav-link" href="#exercises" data-bs-toggle="tab">
-                                    <i class="bi bi-journal-text"></i> 发布习题
+                                <a class="nav-link {% if request.resolver_match.url_name in 'active_assignments,create_assignment' %}active{% endif %}"
+                                   href="{% url 'teacher:active_assignments' current_course.course_id %}">
+                                    <i class="bi bi-journal-text"></i> 习题/考试
                                 </a>
                                 <a class="nav-link" href="#reports" data-bs-toggle="tab">
                                     <i class="bi bi-folder2-open"></i> 发布实验报告
                                 </a>
-                                <a class="nav-link" href="#exams" data-bs-toggle="tab">
-                                    <i class="bi bi-pencil-square"></i> 发布考试
-                                </a>
+
                             </div>
                         </nav>
 
                         {% block option %}{% endblock %}
-                        <!-- 学生列表选项卡-->
+
 
                     </div>
                 </div>
+                <div class="container-fluid">
+                    <div class="d-flex justify-content-between mb-4">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'teacher:active_assignments' current_course.course_id %}"
+                               class="btn {% if request.resolver_match.url_name == 'active_assignments' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                进行中的任务
+                            </a>
+                            <a href="{% url 'teacher:create_assignment' current_course.course_id %}"
+                               class="btn {% if request.resolver_match.url_name == 'create_assignment' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                发布新任务
+                            </a>
+                        </div>
+                        <div>
+                            <span class="badge bg-info">总任务数：{{ assignments|length }}</span>
+                        </div>
+                    </div>
+
+                    {% block assignment_content %}{% endblock %}
+                </div>
             </div>
-            </div>
+
         {% else %}
             <div class="alert alert-info">请选择或创建课程开始操作</div>
         {% endif %}
 
+
+    </div>
 {% endblock %}
+
+
+
+
 
 {% block extra_css %}
     <style>
@@ -113,9 +138,23 @@
                 padding: 0.5rem;
             }
 
-            .list-group-item {
-                flex-direction: column;
-                align-items: start !important;
+            .btn-group .btn {
+                border-radius: 20px;
+                margin-right: 8px;
+                transition: all 0.2s;
+            }
+
+            .btn-group .btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .table-hover tbody tr {
+                transition: background-color 0.15s;
+            }
+
+            .table-hover tbody tr:hover {
+                background-color: #f8f9fa;
             }
         }
     </style>

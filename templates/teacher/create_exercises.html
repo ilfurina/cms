@@ -1,0 +1,72 @@
+{% extends 'teacher/course_edit.html' %}
+{% load static %}
+
+{% block option %}
+<div class="container-fluid">
+    <!-- 发布习题表单 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <input type="text" name="title" class="form-control" placeholder="请输入作业标题" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="datetime-local" name="start_time" class="form-control" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="datetime-local" name="end_time" class="form-control" required>
+                    </div>
+                    <div class="col-12">
+                        <textarea name="description" class="form-control" rows="3" placeholder="作业描述"></textarea>
+                    </div>
+                </div>
+
+                <!-- 题目选择区 -->
+                <div class="row">
+                    <!-- 题库列表 -->
+                    <div class="col-md-6">
+                        <div class="border p-3" style="max-height: 400px; overflow-y: auto;">
+                            <h6>题库题目（点击选择）</h6>
+                            {% for question in questions %}
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="questions"
+                                       value="{{ question.id }}" id="q{{ question.id }}">
+                                <label class="form-check-label d-block" for="q{{ question.id }}">
+                                    <span class="badge bg-primary">{{ question.get_question_type_display }}</span>
+                                    {{ question.content|truncatechars:40 }}
+                                </label>
+                            </div>
+                            {% empty %}
+                            <div class="text-muted">暂无题目，请先创建习题</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- 已选题目预览 -->
+                    <div class="col-md-6">
+                        <div class="border p-3" style="max-height: 400px; overflow-y: auto;">
+                            <h6>已选题目（{{ selected_questions|length }}题）</h6>
+                            <div id="selectedPreview">
+                                {% for q in selected_questions %}
+                                <div class="card mb-2">
+                                    <div class="card-body p-2">
+                                        <small class="text-muted">{{ q.get_question_type_display }}</small>
+                                        <div>{{ q.content }}</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">发布作业</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
