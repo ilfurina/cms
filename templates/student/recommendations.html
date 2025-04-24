@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>课程推荐</h2>
+
+    {# 已选课程 #}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>已选课程</h4>
+        </div>
+        <div class="card-body">
+            {% if enrolled_courses %}
+                <div class="list-group">
+                    {% for course in enrolled_courses %}
+                    <div class="list-group-item">
+                        <h5>{{ course.name }}</h5>
+                        <p class="mb-1">课程代码: {{ course.course_id }}</p>
+                        <small>授课教师: {{ course.teacher.name }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">尚未选择任何课程</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {# 推荐课程 #}
+    <div class="card">
+        <div class="card-header">
+            <h4>推荐课程</h4>
+        </div>
+        <div class="card-body">
+            {% if recommended_courses %}
+                <div class="row">
+                    {% for course in recommended_courses %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ course.name }}</h5>
+                                <p class="card-text">
+                                    <span class="badge bg-primary">{{ course.college.name }}</span>
+                                    <span class="badge bg-success ms-2">{{ course.major.name }}</span>
+                                </p>
+                                <p class="card-text">{{ course.description|default:"暂无课程描述" }}</p>
+                                <form method="post" action="{% url 'student:join_course' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="course_id" value="{{ course.course_id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                                        加入课程
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">暂无推荐课程</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
