@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block tittle %}新建新闻{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">发布新闻</h2>
+    <form method="post" action="{% url 'admin:news_create' %}">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="title" class="form-label">新闻标题</label>
+            <input type="text" class="form-control" id="title" name="title"
+                   placeholder="请输入新闻标题" required>
+        </div>
+
+        <div class="mb-4">
+            <label for="content" class="form-label">新闻内容</label>
+            <textarea class="form-control" id="content" name="content"
+                      rows="5" placeholder="请输入新闻内容" required></textarea>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="#" class="btn btn-secondary me-md-2">返回</a>
+            <button type="submit" class="btn btn-primary">发布新闻</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -99,13 +99,9 @@
                     </h5>
                 </div>
                 <div class="list-group list-group-flush">
-                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                        2024年实验室开放安排
-
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action">新设备操作培训通知</a>
-                    <a href="#" class="list-group-item list-group-item-action">优秀实验成果展示</a>
-                    <a href="#" class="list-group-item list-group-item-action">----------</a>
+                    {% for news in news_list %}
+                    <a href="{% url 'admin:news_detail' news.id %}" class="list-group-item list-group-item-action">{{ news.title }}</a>
+                    {% endfor %}
                 </div>
             </div>
         </div>

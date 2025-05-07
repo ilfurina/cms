@@ -2,6 +2,24 @@
 {% load static %}
 
 {% block option %}
+
+                        <div class="container-fluid">
+                    <div class="d-flex justify-content-between mb-4">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'teacher:active_assignments' current_course.course_id %}"
+                               class="btn {% if request.resolver_match.url_name == 'active_assignments' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                进行中的任务
+                            </a>
+                            <a href="{% url 'teacher:create_assignment' current_course.course_id %}"
+                               class="btn {% if request.resolver_match.url_name == 'create_assignment' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                发布新任务
+                            </a>
+                        </div>
+                    </div>
+
+{#                    {% block assignment_content %}{% endblock %}#}
+                </div>
+
 <div class="container-fluid">
     <!-- 发布习题表单 -->
     <div class="card mb-4">

@@ -2,6 +2,8 @@ from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from accounts.decorators import teacher_required
 import random
+
+from student.models import Student
 from sys_admin.models import Major, College
 from .models import Course, Attendance, CourseResource
 from django.shortcuts import render
@@ -148,7 +150,6 @@ def export_students(request, course_id):
             student.student_id,
             student.name,
             student.college,
-            student.class_id
         ])
 
     return response
@@ -189,9 +190,10 @@ def delete_resource(request, resource_id):
 
 # 六个选项卡
 def students(request, course_id):
+    colleges = College.objects.all()
     course = get_object_or_404(Course, course_id=course_id)
     students = course.students.all()
-    return render(request, 'teacher/students.html', {'current_course': course, 'students': students})
+    return render(request, 'teacher/students.html', {'current_course': course, 'students': students,  'colleges': colleges})
 def resources(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     resources = CourseResource.objects.filter(course=course)
@@ -204,85 +206,158 @@ def attendance(request, course_id):
     return render(request, 'teacher/attendance.html',
           {'current_course': course, 'attendances': attendances})
 
+def reports(request, course_id):
+    course = get_object_or_404(Course, course_id=course_id)
+
+    return render(request, 'teacher/reports.html', {'current_course': course})
+
 
 from django.views import View
 from django.shortcuts import get_object_or_404
 from teacher.models import (
     Course,
-    QuestionBase,
-    SingleChoiceQuestion,
-    MultipleChoiceQuestion,
-    FillInBlankQuestion,
-    EssayQuestion,
-    Assignment,
-    AssignmentQuestion
+
 )
 
 
-class CreateAssignmentView(View):
-    def get(self, request, course_id):
-        course = get_object_or_404(Course, course_id=course_id)
-
-        # 获取所有子类题目（原生Django方式）
-        questions = QuestionBase.objects.filter(course=course).prefetch_related(
-            'singlechoicequestion',
-            'multiplechoicequestion',
-            'fillinblankquestion',
-            'essayquestion'
-        )
-
-        # 获取已选中的题目
-        selected = request.GET.getlist('selected')
-        selected_questions = QuestionBase.objects.filter(id__in=selected)
-
-        return render(request, 'teacher/create_exercises.html', {
-            'current_course': course,
-            'questions': questions,
-            'selected_questions': selected_questions
-        })
-
-    # post 方法保持不变...
-
-    def post(self, request, course_id):
-        course = get_object_or_404(Course, course_id=course_id)
-
-        # 创建作业
-        assignment = Assignment.objects.create(
-            course=course,
-            title=request.POST['title'],
-            description=request.POST.get('description', ''),
-            assignment_type='homework',
-            start_time=request.POST['start_time'],
-            end_time=request.POST['end_time']
-        )
-
-        # 关联题目
-        selected_questions = request.POST.getlist('questions')
-        for order, qid in enumerate(selected_questions, start=1):
-            question = QuestionBase.objects.get(id=qid)
-            AssignmentQuestion.objects.create(
-                assignment=assignment,
-                question=question,
-                points=10,  # 默认分值
-                order=order
-            )
-
-        return redirect('teacher:course_edit', course_id=course_id)
-
-
-from django.utils import timezone
+# class CreateAssignmentView(View):
+#     def get(self, request, course_id):
+#         course = get_object_or_404(Course, course_id=course_id)
+#
+#         # 获取所有子类题目（原生Django方式）
+#         questions = QuestionBase.objects.filter(course=course).prefetch_related(
+#             'singlechoicequestion',
+#             'multiplechoicequestion',
+#             'fillinblankquestion',
+#             'essayquestion'
+#         )
+#
+#         # 获取已选中的题目
+#         selected = request.GET.getlist('selected')
+#         selected_questions = QuestionBase.objects.filter(id__in=selected)
+#
+#         return render(request, 'teacher/create_exercises.html', {
+#             'current_course': course,
+#             'questions': questions,
+#             'selected_questions': selected_questions
+#         })
+#
+#     # post 方法保持不变...
+#
+#     def post(self, request, course_id):
+#         course = get_object_or_404(Course, course_id=course_id)
+#
+#         # 创建作业
+#         assignment = Assignment.objects.create(
+#             course=course,
+#             title=request.POST['title'],
+#             description=request.POST.get('description', ''),
+#             assignment_type='homework',
+#             start_time=request.POST['start_time'],
+#             end_time=request.POST['end_time']
+#         )
+#
+#         # 关联题目
+#         selected_questions = request.POST.getlist('questions')
+#         for order, qid in enumerate(selected_questions, start=1):
+#             question = QuestionBase.objects.get(id=qid)
+#             AssignmentQuestion.objects.create(
+#                 assignment=assignment,
+#                 question=question,
+#                 points=10,  # 默认分值
+#                 order=order
+#             )
+#
+#         return redirect('teacher:course_edit', course_id=course_id)
 
 
-class ActiveAssignmentsView(View):
-    def get(self, request, course_id):
-        course = get_object_or_404(Course, course_id=course_id)
-        now = timezone.now()
+# class ActiveAssignmentsView(View):
+#     def get(self, request, course_id):
+#         course = get_object_or_404(Course, course_id=course_id)
+#         now = timezone.now()
+#
+#         # 获取所有任务并按状态分类
+#         assignments = Assignment.objects.filter(course=course).order_by('-start_time')
+#
+#         return render(request, 'teacher/active_assignment.html', {
+#             'current_course': course,
+#             'assignments': assignments,
+#             'now': now  # 传递当前时间到模板
+#         })
 
-        # 获取所有任务并按状态分类
-        assignments = Assignment.objects.filter(course=course).order_by('-start_time')
 
-        return render(request, 'teacher/active_exercises.html', {
-            'current_course': course,
-            'assignments': assignments,
-            'now': now  # 传递当前时间到模板
-        })
+# def assignment_detail(request, course_id, assignment_id):
+#     assignment = get_object_or_404(Assignment, id=assignment_id)
+#     course = get_object_or_404(Course, course_id=course_id)
+#
+#     submitted_count = Submission.objects.filter(
+#         assignment=assignment,
+#         is_submitted=True
+#     ).count()
+#     unsubmitted_count = course.students.count() - submitted_count
+#
+#     return render(request, 'teacher/assignment_detail.html', {
+#         'course': course,
+#         'assignment': assignment,
+#         'chart_data': {
+#             'labels': ['已提交', '未提交'],
+#             'data': [submitted_count, unsubmitted_count],
+#             'backgroundColor': ['#4CAF50', '#FF5252']
+#         }
+#     })
+
+def import_by_student_id(request):
+    course_id = request.POST.get('course_id')
+    student_id = request.POST.get('student_id')
+    course = Course.objects.get(course_id=course_id)
+    student = Student.objects.get(student_id=student_id)
+    course.students.add(student)
+    course.numbers += 1
+    course.save()
+
+    return redirect('teacher:students', course_id=course_id)
+
+# 按部门导入学生
+def import_by_department(request):
+    if request.method == 'POST':
+        course_id = request.POST.get('course_id')
+        major_id = request.POST.get('major_id')
+
+        try:
+            course = Course.objects.get(course_id=course_id)
+            major = Major.objects.get(major_id=major_id)
+            # 获取该专业所有学生
+            students = Student.objects.filter(major=major)
+            # 批量添加（自动去重）
+            added = 0
+            for student in students:
+                if course.students.filter(student_id=student.student_id).exists():
+                    continue
+                course.students.add(student)
+                added += 1
+
+            course.numbers += added
+            course.save()
+            messages.success(request, f'成功导入{added}名学生')
+
+        except Exception as e:
+            messages.error(request, f'导入失败：{str(e)}')
+
+        return redirect('teacher:students', course_id=course_id)
+
+def get_majors(request):
+    college_id = request.GET.get('college_id')
+    majors = Major.objects.filter(college_id=college_id).values('major_id', 'major_name')
+    return JsonResponse(list(majors), safe=False)
+
+
+def delete_student(request, course_id,student_id):
+    # course_id = request.POST.get('course_id')
+    # student_id = request.POST.get('student_id')
+    course = Course.objects.get(course_id=course_id)
+    student = Student.objects.get(student_id=student_id)
+    course.students.remove(student)
+    course.numbers -= 1
+    course.save()
+
+    return redirect('teacher:students', course_id=course_id)

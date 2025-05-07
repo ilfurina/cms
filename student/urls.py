@@ -7,6 +7,8 @@ urlpatterns = [
     path('info/', views.info, name='info'),
     path('join_course/', views.join_course, name='join_course'),
     path('edit/', views.edit_info, name='edit_info'),
-    path('recommendations/',views.CourseRecommendationsView.as_view(), name='course-recommendations'),
-
+    path('recommendations/', views.CourseRecommendationsView.as_view(), name='course-recommendations'),
+    path('course/<int:course_id>/', views.course_detail, name='course_detail'),
+    path('assignment/<int:assignment_id>/', views.assignment_detail, name='assignment_detail'),
+    path('download/<path:filename>/', views.download_resource, name='download_resource'),
 ]

@@ -23,3 +23,16 @@ class Major(models.Model):
 
     def __str__(self):
         return self.major_name
+
+class News(models.Model):
+    title = models.CharField(max_length=100,unique=True)
+    news_file = models.FileField(upload_to='static/news/', blank=True)
+    content = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class Reports(models.Model):
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

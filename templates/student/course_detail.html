@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>{{ course.name }}</h2>
+            <a href="{% url 'student:dashboard' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> 返回课程列表
+            </a>
+        </div>
+
+        <!-- 选项卡导航 -->
+        <ul class="nav nav-tabs mb-4" id="courseTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tasks-tab" data-bs-toggle="tab"
+                        data-bs-target="#tasks" type="button" role="tab">
+                    <i class="bi bi-list-task"></i> 任务
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="materials-tab" data-bs-toggle="tab"
+                        data-bs-target="#materials" type="button" role="tab">
+                    <i class="bi bi-folder"></i> 资料
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="more-tab" data-bs-toggle="tab"
+                        data-bs-target="#more" type="button" role="tab">
+                    <i class="bi bi-three-dots"></i> 更多
+                </button>
+            </li>
+        </ul>
+
+        <!-- 选项卡内容 -->
+        <div class="tab-content" id="courseTabsContent">
+            <!-- 任务面板 -->
+            <div class="tab-pane fade show active" id="tasks" role="tabpanel">
+                <div class="row">
+                    {% for assignment in assignments %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-{{ assignment.icon }}"></i>
+                                        {{ assignment.title }}
+                                    </h6>
+                                    <div class="card-text">
+                                        <small class="text-muted">
+                                            类型：{{ assignment.get_assignment_type_display }}<br>
+                                            时间：{{ assignment.start_time|date }} - {{ assignment.end_time|date }}
+                                        </small>
+                                        <div class="mt-2">
+                                            {% if now < assignment.start_time %}
+                                                <span class="badge bg-secondary">未开始</span>
+                                            {% elif now > assignment.end_time %}
+                                                <span class="badge bg-danger">已结束</span>
+                                            {% else %}
+                                                <a href="{% url 'student:assignment_detail' assignment.id %}"
+                                                   class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-pencil"></i> 开始作答
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 text-center text-muted py-4">
+                            暂无发布的任务
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 资料面板 -->
+            <div class="tab-pane fade" id="materials" role="tabpanel">
+                <div class="list-group">
+                    {% for resource in resources %}
+                        <span class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-file-pdf me-2"></i>
+                                    {{ resource.filename }}
+                            </div>
+                            <a href="{% url 'student:download_resource' filename=resource.file.name %}" class="ms-2">
+                            <button class="btn btn-sm btn-primary">下载</button>
+                            </a>
+                        </span>
+
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 更多面板 -->
+            <div class="tab-pane fade" id="more" role="tabpanel">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h5><i class="bi bi-download"></i> 资料包</h5>
+                                <button class="btn btn-outline-primary mt-2">
+                                    下载全部课程资料
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h5><i class="bi bi-people"></i> 学习小组</h5>
+                                <div class="mt-2">
+                                    <span class="badge bg-info">当前成员：15人</span>
+                                </div>
+                                <button class="btn btn-outline-success mt-2">
+                                    加入小组
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 激活第一个选项卡
+        document.getElementById('tasks-tab').click();
+        // 添加哈希值支持
+        window.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash;
+            if (hash) {
+                const triggerEl = document.querySelector(`${hash}-tab`);
+                if (triggerEl) bootstrap.Tab.getOrCreateInstance(triggerEl).show();
+            }
+        });
+    </script>
+
+{% endblock %}

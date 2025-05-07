@@ -67,8 +67,12 @@
                                    href="{% url 'teacher:active_assignments' current_course.course_id %}">
                                     <i class="bi bi-journal-text"></i> 习题/考试
                                 </a>
-                                <a class="nav-link" href="#reports" data-bs-toggle="tab">
-                                    <i class="bi bi-folder2-open"></i> 发布实验报告
+                                <a class="nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}"
+                                   href="#reports" data-bs-toggle="tab">
+                                    <i class="bi bi-folder2-open"></i> 实验报告
+                                </a>
+                                <a class="nav-link" href="#discuss" data-bs-toggle="tab">
+                                    <i class= " bi bi-chat-left-text"></i> 发起讨论
                                 </a>
 
                             </div>
@@ -79,29 +83,11 @@
 
                     </div>
                 </div>
-                <div class="container-fluid">
-                    <div class="d-flex justify-content-between mb-4">
-                        <div class="btn-group" role="group">
-                            <a href="{% url 'teacher:active_assignments' current_course.course_id %}"
-                               class="btn {% if request.resolver_match.url_name == 'active_assignments' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                                进行中的任务
-                            </a>
-                            <a href="{% url 'teacher:create_assignment' current_course.course_id %}"
-                               class="btn {% if request.resolver_match.url_name == 'create_assignment' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                                发布新任务
-                            </a>
-                        </div>
-                        <div>
-                            <span class="badge bg-info">总任务数：{{ assignments|length }}</span>
-                        </div>
-                    </div>
 
-                    {% block assignment_content %}{% endblock %}
-                </div>
             </div>
 
         {% else %}
-            <div class="alert alert-info">请选择或创建课程开始操作</div>
+            <div class="alert alert-info">暂无任务详情</div>
         {% endif %}
 
 

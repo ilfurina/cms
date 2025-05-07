@@ -1,11 +1,17 @@
+from os.path import basename
+from cms.settings import BASE_DIR
+from django.http import HttpResponseForbidden, FileResponse
 from django.shortcuts import render, redirect
+from django.utils import timezone
+
 from accounts.decorators import student_required
 from django.contrib import messages
-from teacher.models import Course
+from teacher.models import Course, CourseResource
 from sys_admin.models import College, Major
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from .recommender import CourseRecommender
+
 
 
 @student_required
@@ -24,7 +30,6 @@ def info(request):
         'student_id': user.student_id,
         'college': user.college,
         'major': user.major,
-        # 'class_id': user.class_id,
     }
     return render(request, 'student/info.html', {'information': information})
 
@@ -80,10 +85,6 @@ def join_course(request):
     return redirect('student:dashboard')
 
 
-
-
-
-
 class CourseRecommendationsView(LoginRequiredMixin, View):
 
     def get(self, request):
@@ -95,3 +96,74 @@ class CourseRecommendationsView(LoginRequiredMixin, View):
             'enrolled_courses':enrolled_courses,
             'recommended_courses': recommended_courses,
         })
+
+
+def course_detail(request, course_id):
+    student = request.user.student
+    course = get_object_or_404(Course, course_id=course_id)
+
+    # 验证学生是否已选该课程
+    if not course.students.filter(pk=student.pk).exists():
+        return HttpResponseForbidden("未加入该课程")
+
+    assignments = Assignment.objects.filter(course=course).order_by('-start_time')
+    now = timezone.now()
+    resources = CourseResource.objects.filter(course=course)
+
+
+    return render(request, 'student/course_detail.html', {
+        'course': course,
+        'assignments': assignments,
+        'now': now,
+        'resources': resources,
+    })
+
+
+def assignment_detail(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    student = request.user.student
+
+    # 验证权限
+    if not assignment.course.students.filter(pk=student.pk).exists():
+        return HttpResponseForbidden("无访问权限")
+
+    # 获取题目列表（按顺序）
+    questions = assignment.assignmentquestion_set.order_by('order')
+
+    return render(request, 'student/assignment_detail.html', {
+        'assignment': assignment,
+        'questions': questions
+    })
+
+
+@student_required
+def submit_assignment(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    student = request.user.student
+
+    # 创建或更新提交记录
+    Submission.objects.update_or_create(
+        student=student,
+        assignment=assignment,
+        defaults={
+            'is_submitted': True,
+            'submitted_at': timezone.now()
+        }
+    )
+    messages.success(request, '作业提交成功')
+    return redirect('student:assignment_detail', assignment_id=assignment_id)
+
+
+from urllib.parse import quote
+def download_resource(request, filename):
+    resource = get_object_or_404(CourseResource, file=filename)
+    file_path = resource.file.path
+
+    response = FileResponse(open(file_path, 'rb'))
+    response['Content-Type'] = 'application/octet-stream'
+
+    encoded_filename = quote(resource.filename)
+    response['Content-Disposition'] = f"attachment; filename*=UTF-8''{encoded_filename}"
+
+    return response
+

@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
-from .models import College,Major
+from .models import College, Major, News
+from django.core.files.base import ContentFile
+
 
 def dashboard(request):
 
@@ -30,3 +32,43 @@ def create_major(request):
         college = College.objects.get(college_id=college_id)
         major = Major.objects.create(college=college, major_id=major_id, major_name=major_name)
         return redirect('admin:major_list',college_id=college_id)
+
+def news_list(request):
+    news_list = News.objects.all()
+    return render(request, 'admin/news_list.html', {'news_list': news_list})
+
+def news_create(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        file = News()
+        file.news_file.save(name=title, content=ContentFile(content),save=True)
+
+        file.title = title
+        file.save()
+
+        return redirect('admin:news_list')
+    return render(request, 'admin/news_create.html')
+
+def  news_delete(request, news_id):
+    news = News.objects.get(id=news_id)
+    news.news_file.delete()
+    news.delete()
+    return redirect('admin:news_list')
+
+def news_edit(request, news_id):
+    news = News.objects.get(id=news_id)
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        file = news.news_file
+        file.save(name=title, content=ContentFile(content),save=True)
+        news.title = title
+        news.save()
+        return redirect('admin:news_list')
+
+def news_detail(request, news_id):
+    news = News.objects.get(id=news_id)
+    with news.news_file.open(mode='r') as f:
+        news_content = f.read()
+    return render(request, 'admin/news.html', {'news': news,  'news_content': news_content})

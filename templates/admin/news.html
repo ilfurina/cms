@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新闻详情 - {{ news.title }}</title>
+    <!-- 引入Bootstrap 5 -->
+    <link href="{% static 'bootstrap-5.0.2/css/bootstrap.min.css' %}">
+    <style>
+        .news-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        .news-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #333;
+            white-space: pre-wrap;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .news-meta {
+            color: #666;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .news-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="news-container">
+        <!-- 返回列表按钮 -->
+        <a href="{% url 'welcome' %}" class="btn btn-outline-secondary mb-4">
+            &laquo; 返回主页
+        </a>
+
+        <!-- 新闻标题 -->
+        <h1 class="news-title">{{ news.title }}</h1>
+
+        <!-- 元信息 -->
+        <div class="news-meta">
+            <span>发布日期：{{ news.created_at|date:"Y年m月d日 H:i" }}</span>
+            {% if news.updated_at != news.created_at %}
+                <span class="ms-3">更新于：{{ news.updated_at|date:"Y年m月d日 H:i" }}</span>
+            {% endif %}
+        </div>
+
+        <!-- 新闻内容区域 -->
+        <div class="news-content">
+            {{ news_content|linebreaks }}
+        </div>
+    </div>
+
+    <script src="{% static 'bootstrap-5.0.2/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

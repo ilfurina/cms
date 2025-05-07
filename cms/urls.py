@@ -20,7 +20,7 @@ from cms import views
 
 urlpatterns = [
 
-    path('', views.welcome),
+    path('', views.welcome, name='welcome'),
     path('accounts/', include('accounts.urls')),
     path('teacher/', include('teacher.urls')),
     path('student/', include('student.urls')),
