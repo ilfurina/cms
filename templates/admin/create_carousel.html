@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">添加轮播图</h4>
+        </div>
+
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">标题</label>
+                        <input type="text" name="title" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">排序值</label>
+                        <input type="number" name="order" class="form-control"
+                               value="0" min="0" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">图片文件</label>
+                        <input type="file" name="image"
+                               class="form-control" accept="image/*" required>
+                        <div class="form-text">建议尺寸：1920×600像素，支持JPG/PNG格式</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">跳转链接</label>
+                        <input type="url" name="link_url" class="form-control"
+                               placeholder="http://">
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox"
+                                   name="is_active" id="is_active" checked>
+                            <label class="form-check-label" for="is_active">
+                                立即启用
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save"></i> 保存
+                        </button>
+                        <a href="{% url 'admin:carousel_list' %}"
+                           class="btn btn-secondary">
+                            返回列表
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

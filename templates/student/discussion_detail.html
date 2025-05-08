@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>{{ topic.title }}</h3>
+        <a href="{% url 'student:course_detail' topic.course.course_id|default:0 %}"
+           class="btn btn-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> 返回课程
+        </a>
+    </div>
+
+    <!-- 讨论主体 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h6 class="card-title mb-1">{{ topic.created_by.name }}</h6>
+                    <small class="text-muted">
+                        {{ topic.created_at|date:"Y-m-d H:i" }}
+                    </small>
+                </div>
+                <span class="badge bg-primary">教师</span>
+            </div>
+            <p class="card-text">{{ topic.content }}</p>
+        </div>
+    </div>
+
+    <!-- 回复列表 -->
+    <div class="mb-4">
+        <h5>全部回复（{{ topic.posts.count }}）</h5>
+        <div class="list-group">
+            {% for post in topic.posts.all %}
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1">
+                            {{ post.author.student.name|default:post.author.teacher.name }}
+                            <small class="text-muted ms-2">
+                                {% if post.author.teacher %}
+                                <span class="badge bg-primary">教师</span>
+                                {% else %}
+                                <span class="badge bg-success">学生</span>
+                                {% endif %}
+                            </small>
+                        </h6>
+                        <small class="text-muted">
+                            {{ post.created_at|date:"Y-m-d H:i" }}
+                        </small>
+                        <p class="mt-2 mb-0">{{ post.content }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="alert alert-info">暂无回复</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 回复表单 -->
+    <div class="card">
+        <div class="card-body">
+            <form method="post" action="{% url 'student:create_post' topic.id %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <textarea name="content" 
+                              class="form-control form-control-sm" 
+                              rows="3" 
+                              placeholder="撰写你的回复..."
+                              required></textarea>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="bi bi-send"></i> 提交回复
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

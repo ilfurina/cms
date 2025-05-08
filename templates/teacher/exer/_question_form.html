@@ -1,0 +1,79 @@
+<!-- templates/teacher/_question_form.html -->
+{% load widget_tweaks %}
+
+<form method="post" id="questionForm">
+    {% csrf_token %}
+
+    <!-- 公共字段 -->
+    <div class="form-group">
+        <label>题目内容</label>
+        {% render_field form.content class+="form-control" rows="3" %}
+    </div>
+
+    <div class="form-group">
+        <label>难度等级</label>
+        {% render_field form.difficulty class+="form-control" %}
+        <small class="form-text text-muted">1-5级，数值越大难度越高</small>
+    </div>
+
+    <!-- 题型特定字段 -->
+    {% if form.options %}
+    <div class="form-group">
+        <label>选项列表</label>
+        {% render_field form.options class+="form-control" %}
+        <small class="form-text text-muted">使用JSON数组格式，例如：["选项A", "选项B", "选项C"]</small>
+    </div>
+    {% endif %}
+
+    {% if form.correct_answer %}
+    <div class="form-group">
+        <label>正确答案</label>
+        {% render_field form.correct_answer class+="form-control" %}
+    </div>
+    {% endif %}
+
+    {% if form.correct_answers %}
+    <div class="form-group">
+        <label>正确答案索引</label>
+        {% render_field form.correct_answers class+="form-control" %}
+        <small class="form-text text-muted">使用JSON数组格式，例如：[0,2] 表示选择第1和第3个选项</small>
+    </div>
+    {% endif %}
+
+    {% if form.correct_keywords %}
+    <div class="form-group">
+        <label>关键词</label>
+        {% render_field form.correct_keywords class+="form-control" %}
+        <small class="form-text text-muted">使用JSON数组格式，例如：["关键词1", "关键词2"]</small>
+    </div>
+    {% endif %}
+
+    {% if form.reference_answer %}
+    <div class="form-group">
+        <label>参考答案</label>
+        {% render_field form.reference_answer class+="form-control" rows="4" %}
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary">保存题目</button>
+</form>
+
+<script>
+// 表单提交处理
+document.getElementById('questionForm').addEventListener('submit', function(e) {
+    // 验证JSON字段格式
+    const jsonFields = ['options', 'correct_answers', 'correct_keywords'];
+    jsonFields.forEach(field => {
+        const input = this.querySelector(`[name="${field}"]`);
+        if (input) {
+            try {
+                JSON.parse(input.value);
+            } catch (error) {
+                e.preventDefault();
+                alert(`请输入有效的JSON格式（${field}）`);
+                input.focus();
+            }
+        }
+    });
+});
+</script>

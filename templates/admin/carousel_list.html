@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0">轮播图管理</h4>
+            <a href="{% url 'admin:create_carousel' %}" class="btn btn-light btn-sm mt-2">
+                <i class="bi bi-plus-circle"></i> 添加新轮播图
+            </a>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>排序</th>
+                            <th>标题</th>
+                            <th>图片预览</th>
+                            <th>链接地址</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for carousel in carousels %}
+                        <tr>
+                            <td>{{ carousel.order }}</td>
+                            <td>{{ carousel.title }}</td>
+                            <td>
+                                <img src="{{ carousel.image.url }}"
+                                     alt="{{ carousel.title }}"
+                                     style="max-width: 150px; height: auto;">
+                            </td>
+                            <td>
+                                {% if carousel.link_url %}
+                                <a href="{{ carousel.link_url }}" target="_blank">查看链接</a>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if carousel.is_active %}
+                                <span class="badge bg-success">启用</span>
+                                {% else %}
+                                <span class="badge bg-secondary">停用</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'admin:delete_carousel' carousel.id %}"
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('确定删除该轮播图吗？')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">暂无轮播图数据</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

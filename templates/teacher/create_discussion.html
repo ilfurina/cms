@@ -1,0 +1,34 @@
+{% extends 'teacher/course_edit.html' %}
+{% block option %}
+<div class="container">
+    <div class="card">
+        <div class="card-header bg-light py-2">
+            <h5 class="mb-0">新建讨论主题</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">主题标题</label>
+                    <input type="text" name="title" 
+                           class="form-control form-control-sm" 
+                           required maxlength="200">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">讨论内容</label>
+                    <textarea name="content" 
+                              class="form-control form-control-sm" 
+                              rows="5" required></textarea>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'teacher:discussion_list' current_course.course_id %}" 
+                       class="btn btn-sm btn-secondary">取消</a>
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="bi bi-send"></i> 发布讨论
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'teacher/course_edit.html' %}
+{% block option %}
+<div class="container">
+    <div class="d-flex justify-content-between mb-3">
+        <h5>讨论管理</h5>
+        <a href="{% url 'teacher:create_discussion' current_course.course_id %}" 
+           class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg"></i> 新建讨论
+        </a>
+    </div>
+    
+    <div class="list-group">
+        {% for discussion in object_list %}
+        <div class="list-group-item">
+            <h6>{{ discussion.title }}</h6>
+            <small class="text-muted">
+                创建于 {{ discussion.created_at|date }} · 
+                回复数 {{ discussion.posts.count }}
+            </small>
+        </div>
+        {% empty %}
+        <div class="alert alert-info">暂无讨论主题</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

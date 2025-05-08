@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-light py-2">
+            <h5 class="mb-0">撰写回复</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <textarea name="content" 
+                              class="form-control form-control-sm" 
+                              rows="5" 
+                              placeholder="输入你的回复内容..."
+                              required></textarea>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'student:discussion_detail' topic.pk %}"
+                       class="btn btn-sm btn-secondary">取消</a>
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="bi bi-send"></i> 提交回复
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

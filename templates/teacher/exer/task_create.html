@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>创建习题任务</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+        </div>
+        <div class="mb-3">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+        </div>
+        <div class="mb-3">
+            <label>选择题目</label>
+            <div class="question-list" style="max-height: 400px; overflow-y: auto;">
+                {% for question in form.questions %}
+                    <div class="form-check">
+                        {{ question.tag }}
+                        <label class="form-check-label">
+                            {{ question.choice_label }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">发布任务</button>
+    </form>
+</div>
+{% endblock %}
