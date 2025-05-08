@@ -67,12 +67,13 @@
                                    href="{% url 'teacher:active_assignments' current_course.course_id %}">
                                     <i class="bi bi-journal-text"></i> 习题/考试
                                 </a>
-                                <a class="nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}"
-                                   href="#reports" data-bs-toggle="tab">
+                                <a class="nav-link {% if request.resolver_match.url_name in 'reports,create_report' %}active{% endif %}"
+                                   href="{% url 'teacher:reports' current_course.course_id %}">
                                     <i class="bi bi-folder2-open"></i> 实验报告
                                 </a>
-                                <a class="nav-link" href="#discuss" data-bs-toggle="tab">
-                                    <i class= " bi bi-chat-left-text"></i> 发起讨论
+                                <a class="nav-link {% if request.resolver_match.url_name in 'discussion_list,create_discussion' %}active{% endif %}"
+                                   href="{% url 'teacher:discussion_list' current_course.course_id %}">
+                                    <i class="bi bi-chat-left-text"></i> 课程讨论
                                 </a>
 
                             </div>

@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from accounts.decorators import teacher_required
@@ -5,7 +6,8 @@ import random
 
 from student.models import Student
 from sys_admin.models import Major, College
-from .models import Course, Attendance, CourseResource
+# from .forms import QuestionForm, ExerciseTaskForm
+from .models import Course, Attendance, CourseResource, Teacher
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 import csv
@@ -209,102 +211,104 @@ def attendance(request, course_id):
 def reports(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
 
-    return render(request, 'teacher/reports.html', {'current_course': course})
+    return render(request, 'teacher/report_list.html', {'current_course': course})
 
 
 from django.views import View
 from django.shortcuts import get_object_or_404
 from teacher.models import (
     Course,
-
+    QuestionBase,
+    SingleChoiceQuestion,
+    MultipleChoiceQuestion,
+    FillInBlankQuestion,
+    EssayQuestion,
+    Assignment,
+    AssignmentQuestion
 )
 
 
-# class CreateAssignmentView(View):
-#     def get(self, request, course_id):
-#         course = get_object_or_404(Course, course_id=course_id)
-#
-#         # 获取所有子类题目（原生Django方式）
-#         questions = QuestionBase.objects.filter(course=course).prefetch_related(
-#             'singlechoicequestion',
-#             'multiplechoicequestion',
-#             'fillinblankquestion',
-#             'essayquestion'
-#         )
-#
-#         # 获取已选中的题目
-#         selected = request.GET.getlist('selected')
-#         selected_questions = QuestionBase.objects.filter(id__in=selected)
-#
-#         return render(request, 'teacher/create_exercises.html', {
-#             'current_course': course,
-#             'questions': questions,
-#             'selected_questions': selected_questions
-#         })
-#
-#     # post 方法保持不变...
-#
-#     def post(self, request, course_id):
-#         course = get_object_or_404(Course, course_id=course_id)
-#
-#         # 创建作业
-#         assignment = Assignment.objects.create(
-#             course=course,
-#             title=request.POST['title'],
-#             description=request.POST.get('description', ''),
-#             assignment_type='homework',
-#             start_time=request.POST['start_time'],
-#             end_time=request.POST['end_time']
-#         )
-#
-#         # 关联题目
-#         selected_questions = request.POST.getlist('questions')
-#         for order, qid in enumerate(selected_questions, start=1):
-#             question = QuestionBase.objects.get(id=qid)
-#             AssignmentQuestion.objects.create(
-#                 assignment=assignment,
-#                 question=question,
-#                 points=10,  # 默认分值
-#                 order=order
-#             )
-#
-#         return redirect('teacher:course_edit', course_id=course_id)
+
+class CreateAssignmentView(View):
+    def get(self, request, course_id):
+        course = get_object_or_404(Course, course_id=course_id)
+        # teacher = get_object_or_404(Teacher, teacher_id=request.user.teacher.teacher_id)
 
 
-# class ActiveAssignmentsView(View):
-#     def get(self, request, course_id):
-#         course = get_object_or_404(Course, course_id=course_id)
-#         now = timezone.now()
-#
-#         # 获取所有任务并按状态分类
-#         assignments = Assignment.objects.filter(course=course).order_by('-start_time')
-#
-#         return render(request, 'teacher/active_assignment.html', {
-#             'current_course': course,
-#             'assignments': assignments,
-#             'now': now  # 传递当前时间到模板
-#         })
+        questions = QuestionBase.objects.filter(teacher=request.user.teacher).prefetch_related(
+            'singlechoicequestion',
+            'multiplechoicequestion',
+            'fillinblankquestion',
+            'essayquestion'
+        )
+        # questions = (QuestionBase.objects.filter(teacher=request.user.teacher)
+        #              .non_polymorphic().instance_of(SingleChoiceQuestion, MultipleChoiceQuestion, FillInBlankQuestion, EssayQuestion))
+
+        # 获取已选中的题目
+        selected = request.GET.getlist('selected')
+        selected_questions = QuestionBase.objects.filter(id__in=selected)
+
+        return render(request, 'teacher/create_exercises.html', {
+            'current_course': course,
+            'questions': questions,
+            'selected_questions': selected_questions
+        })
+
+    # post 方法保持不变...
+
+    def post(self, request, course_id):
+        course = get_object_or_404(Course, course_id=course_id)
+
+        # 创建作业
+        assignment = Assignment.objects.create(
+            course=course,
+            title=request.POST['title'],
+            description=request.POST.get('description', ''),
+            assignment_type='homework',
+            start_time=request.POST['start_time'],
+            end_time=request.POST['end_time']
+        )
+
+        # 关联题目
+        selected_questions = request.POST.getlist('questions')
+        for order, qid in enumerate(selected_questions, start=1):
+            question = QuestionBase.objects.get(id=qid)
+            AssignmentQuestion.objects.create(
+                assignment=assignment,
+                question=question,
+                points=10,  # 默认分值
+                order=order
+            )
+
+        return redirect('teacher:edit', course_id=course_id)
 
 
-# def assignment_detail(request, course_id, assignment_id):
-#     assignment = get_object_or_404(Assignment, id=assignment_id)
-#     course = get_object_or_404(Course, course_id=course_id)
-#
-#     submitted_count = Submission.objects.filter(
-#         assignment=assignment,
-#         is_submitted=True
-#     ).count()
-#     unsubmitted_count = course.students.count() - submitted_count
-#
-#     return render(request, 'teacher/assignment_detail.html', {
-#         'course': course,
-#         'assignment': assignment,
-#         'chart_data': {
-#             'labels': ['已提交', '未提交'],
-#             'data': [submitted_count, unsubmitted_count],
-#             'backgroundColor': ['#4CAF50', '#FF5252']
-#         }
-#     })
+from django.utils import timezone
+
+
+class ActiveAssignmentsView(View):
+    def get(self, request, course_id):
+        course = get_object_or_404(Course, course_id=course_id)
+        now = timezone.localtime()
+
+        # 获取所有任务并按状态分类
+        assignments = Assignment.objects.filter(course=course).order_by('-start_time')
+
+        # 转换作业时间为本地时区
+        # for assignment in assignments:
+        #     assignment.start_time = timezone.localtime(assignment.start_time)
+        #     assignment.end_time = timezone.localtime(assignment.end_time)
+
+        return render(request, 'teacher/active_assignment.html', {
+            'current_course': course,
+            'assignments': assignments,
+            'now': now  # 传递当前时间到模板
+        })
+
+# 题库导入功能
+
+# 从题库中选择题目创建作业功能
+
 
 def import_by_student_id(request):
     course_id = request.POST.get('course_id')
@@ -361,3 +365,139 @@ def delete_student(request, course_id,student_id):
     course.save()
 
     return redirect('teacher:students', course_id=course_id)
+
+
+from django.db.models import Count
+from django.http import Http404
+
+
+@teacher_required
+def assignment_progress(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    course = assignment.course
+
+    # 验证教师权限
+    if course.teacher != request.user.teacher:
+        raise Http404
+
+    # 获取已提交学生
+    submitted = Student.objects.filter(
+        assignmentsubmission__assignment=assignment,
+        assignmentsubmission__is_submitted=1
+    ).distinct()
+
+    # 获取未提交学生
+    all_students = course.students.all()
+    not_submitted = all_students.difference(submitted)
+
+    # 统计比例
+    total = all_students.count()
+    submitted_count = submitted.count()
+    not_submitted_count = total - submitted_count
+
+    # 图表数据
+    chart_data = {
+        'labels': ['已完成', '未完成'],
+        'datasets': [{
+            'data': [submitted_count, not_submitted_count],
+            'backgroundColor': ['#36a2eb', '#ff6384']
+        }]
+    }
+
+    return render(request, 'teacher/assignment_progress.html', {
+        'assignment': assignment,
+        'submitted_students': submitted,
+        'not_submitted_students': not_submitted,
+        'chart_data': chart_data
+    })
+
+from django.views.generic import CreateView, ListView
+from teacher.models import ReportAssignment
+
+class CreateReportView(CreateView):
+    model = ReportAssignment
+    fields = ['title', 'description', 'attachment', 'deadline']
+    template_name = 'teacher/report_create.html'
+
+    def form_valid(self, form):
+        course = get_object_or_404(Course, pk=self.kwargs['course_id'])
+        form.instance.course = course
+        form.instance.created_by = self.request.user.teacher
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('teacher:reports',
+                       kwargs={'course_id': self.kwargs['course_id']})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 添加当前课程到上下文
+        context['current_course'] = get_object_or_404(
+            Course,
+            course_id=self.kwargs['course_id']
+        )
+        return context
+
+class ReportListView(ListView):
+    model = ReportAssignment
+    template_name = 'teacher/report_list.html'
+    context_object_name = 'reports'
+
+    def get_queryset(self):
+        return ReportAssignment.objects.filter(
+            course_id=self.kwargs['course_id']
+        ).order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 添加当前课程到上下文
+        context['current_course'] = get_object_or_404(
+            Course,
+            course_id=self.kwargs['course_id']
+        )
+        return context
+
+
+from django.views.generic import CreateView, ListView
+from .models import DiscussionTopic
+
+class DiscussionListView(ListView):
+    template_name = 'teacher/discussion_list.html'
+
+    def get_queryset(self):
+        course_id = self.kwargs['course_id']
+        return DiscussionTopic.objects.filter(course_id=course_id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 添加当前课程到上下文
+        context['current_course'] = get_object_or_404(
+            Course,
+            course_id=self.kwargs['course_id']
+        )
+        return context
+
+class CreateDiscussionView(CreateView):
+    model = DiscussionTopic
+    fields = ['title', 'content']
+    template_name = 'teacher/create_discussion.html'
+
+    def form_valid(self, form):
+        course = get_object_or_404(Course, pk=self.kwargs['course_id'])
+        form.instance.course = course
+        form.instance.created_by = self.request.user.teacher
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 添加当前课程到上下文
+        context['current_course'] = get_object_or_404(
+            Course,
+            course_id=self.kwargs['course_id']
+        )
+        return context
+
+    def get_success_url(self):
+        return reverse('teacher:discussion_list',
+                     kwargs={'course_id': self.kwargs['course_id']})
+

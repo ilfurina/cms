@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ assignment.title }}</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <p class="card-text">{{ assignment.description|linebreaks }}</p>
+            <p class="text-muted">
+                截止时间：{{ assignment.end_time|date:"Y-m-d H:i" }}
+            </p>
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'student:submit_assignment' assignment.id %}">
+        {% csrf_token %}
+        {% for aq in assignment.assignmentquestion_set.all %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">第 {{ forloop.counter }} 题（{{ aq.question.get_question_type_display }}）</h5>
+                <div class="ms-3">
+                    {% include "student/_question_template.html" with question=aq.question %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-lg"
+                {% if submission.is_submitted %}disabled{% endif %}>
+                {{ submission.is_submitted|yesno:"已提交,提交作业" }}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

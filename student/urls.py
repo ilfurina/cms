@@ -11,4 +11,11 @@ urlpatterns = [
     path('course/<int:course_id>/', views.course_detail, name='course_detail'),
     path('assignment/<int:assignment_id>/', views.assignment_detail, name='assignment_detail'),
     path('download/<path:filename>/', views.download_resource, name='download_resource'),
+    path('assignment/<int:assignment_id>/', views.assignment_detail, name='assignment_detail'),
+    path('submit_assignment/<int:assignment_id>/', views.submit_assignment, name='submit_assignment'),
+    path('discussion/<int:pk>/', views.StudentDiscussionView.as_view(),
+         name='discussion_detail'),
+    path('discussion/<int:pk>/reply/', views.CreatePostView.as_view(),
+         name='create_post'),
+
 ]

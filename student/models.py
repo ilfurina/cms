@@ -10,3 +10,15 @@ class Student(models.Model):
     college = models.ForeignKey(College, on_delete=models.CASCADE,null=True, blank=True)
     major = models.ForeignKey(Major, on_delete=models.CASCADE,null=True, blank=True)
 
+
+class AssignmentSubmission(models.Model):
+    assignment = models.ForeignKey('teacher.Assignment', on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    submit_time = models.DateTimeField(auto_now_add=True)
+    score = models.FloatField(default=0)
+    is_submitted = models.BooleanField(default=False)
+
+class StudentAnswer(models.Model):
+    submission = models.ForeignKey(AssignmentSubmission, on_delete=models.CASCADE)
+    question = models.ForeignKey('teacher.QuestionBase', on_delete=models.CASCADE)
+    answer = models.JSONField()  # 存储不同题型的答案

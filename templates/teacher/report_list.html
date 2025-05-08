@@ -1,0 +1,41 @@
+{% extends 'teacher/course_edit.html' %}
+{% block option %}
+<div class="border rounded p-3">
+    <div class="d-flex justify-content-between mb-3">
+        <h6>实验报告任务</h6>
+        <a href="{% url 'teacher:create_report' current_course.course_id %}"
+           class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg"></i> 新建任务
+        </a>
+    </div>
+
+    <div class="list-group">
+        {% for report in reports %}
+        <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1">{{ report.title }}</h6>
+                    <small class="text-muted">
+                        截止时间：{{ report.deadline|date:"Y/m/d H:i" }}
+                    </small>
+                </div>
+                <span class="badge bg-{% if report.status == '进行中' %}success{% else %}secondary{% endif %}">
+                    {{ report.status }}
+                </span>
+            </div>
+            <div class="mt-2">
+                <p class="mb-1">{{ report.description }}</p>
+                {% if report.attachment %}
+                <a href="{{ report.attachment.url }}"
+                   class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-download"></i> 下载附件
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info">暂无实验报告任务</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

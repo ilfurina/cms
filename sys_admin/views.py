@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import College, Major, News
 from django.core.files.base import ContentFile
+from .models import Carousel
 
 
 def dashboard(request):
@@ -72,3 +73,33 @@ def news_detail(request, news_id):
     with news.news_file.open(mode='r') as f:
         news_content = f.read()
     return render(request, 'admin/news.html', {'news': news,  'news_content': news_content})
+
+def carousel_list(request):
+    carousels = Carousel.objects.filter(is_active=True).order_by('order')
+    return render(request, 'admin/carousel_list.html', {'carousels': carousels})
+
+
+def create_carousel(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        image = request.FILES.get('image')
+        link_url = request.POST.get('link_url')
+        order = request.POST.get('order', 0)
+        is_active = 'is_active' in request.POST
+
+        Carousel.objects.create(
+            title=title,
+            image=image,
+            link_url=link_url,
+            order=order,
+            is_active=is_active
+        )
+        return redirect('admin:carousel_list')
+    return render(request, 'admin/create_carousel.html')
+
+def delete_carousel(request, carousel_id):
+    carousel = Carousel.objects.get(id=carousel_id)
+    carousel.image.delete()  # 删除图片文件
+    carousel.delete()
+    return redirect('admin:carousel_list')
+

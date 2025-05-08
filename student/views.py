@@ -1,12 +1,16 @@
 from os.path import basename
+
+from django.views.decorators.http import require_POST
+from django.views.generic import DetailView, CreateView
+
 from cms.settings import BASE_DIR
-from django.http import HttpResponseForbidden, FileResponse
+from django.http import HttpResponseForbidden, FileResponse, HttpResponseBadRequest, Http404
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
 from accounts.decorators import student_required
 from django.contrib import messages
-from teacher.models import Course, CourseResource
+from teacher.models import Course, CourseResource, Assignment
 from sys_admin.models import College, Major
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
@@ -35,7 +39,7 @@ def info(request):
 
 
 from django.contrib.auth.decorators import login_required
-from .models import Student
+from .models import Student, AssignmentSubmission, StudentAnswer
 from django.shortcuts import get_object_or_404
 
 
@@ -110,47 +114,74 @@ def course_detail(request, course_id):
     now = timezone.now()
     resources = CourseResource.objects.filter(course=course)
 
+    submitted_assignments = AssignmentSubmission.objects.filter(
+        student=student,
+        is_submitted=1,
+        assignment__in=assignments
+    ).values_list('assignment_id', flat=True)
 
     return render(request, 'student/course_detail.html', {
         'course': course,
         'assignments': assignments,
         'now': now,
         'resources': resources,
+        'submitted_assignments': set(submitted_assignments),
+
     })
 
-
+from polymorphic.query import PolymorphicQuerySet
 def assignment_detail(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id)
-    student = request.user.student
+    now = timezone.now()
 
-    # 验证权限
-    if not assignment.course.students.filter(pk=student.pk).exists():
-        return HttpResponseForbidden("无访问权限")
+    # 验证时间有效性
+    if not (assignment.start_time <= now <= assignment.end_time):
+        return HttpResponseForbidden("当前不在作业有效期内")
 
-    # 获取题目列表（按顺序）
-    questions = assignment.assignmentquestion_set.order_by('order')
+    # 获取或创建提交记录
+    submission, created = AssignmentSubmission.objects.get_or_create(
+        assignment=assignment,
+        student=request.user.student
+    )
+
+    # 获取已答题目
+    # answered = {ans.question_id: ans.answer for ans in submission.studentanswer_set.all()}
+    answered = {
+        ans.question_id: ans.answer
+        for ans in submission.studentanswer_set.all().prefetch_related('question')
+    }
 
     return render(request, 'student/assignment_detail.html', {
         'assignment': assignment,
-        'questions': questions
+        'submission': submission,
+        'answered': answered
     })
 
-
-@student_required
+@require_POST
 def submit_assignment(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id)
-    student = request.user.student
+    submission = get_object_or_404(AssignmentSubmission,
+                                   assignment=assignment,
+                                   student=request.user.student
+                                   )
 
-    # 创建或更新提交记录
-    Submission.objects.update_or_create(
-        student=student,
-        assignment=assignment,
-        defaults={
-            'is_submitted': True,
-            'submitted_at': timezone.now()
-        }
-    )
-    messages.success(request, '作业提交成功')
+    if submission.is_submitted:
+        return HttpResponseBadRequest("作业已提交，不可重复提交")
+
+    # 处理每道题的答案
+    for question in assignment.questions.all():
+        answer_key = f"question_{question.id}"
+        if answer_key in request.POST:
+            StudentAnswer.objects.update_or_create(
+                submission=submission,
+                question=question,
+                defaults={'answer': request.POST[answer_key]}
+            )
+
+    # 标记为已提交
+    submission.is_submitted = True
+    submission.save()
+
     return redirect('student:assignment_detail', assignment_id=assignment_id)
 
 
@@ -166,4 +197,32 @@ def download_resource(request, filename):
     response['Content-Disposition'] = f"attachment; filename*=UTF-8''{encoded_filename}"
 
     return response
+
+from teacher.models import DiscussionTopic, DiscussionPost
+
+class StudentDiscussionView(DetailView):
+    model = DiscussionTopic
+    template_name = 'student/discussion_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['topic'] = get_object_or_404(DiscussionTopic, pk=self.kwargs['pk'])
+        if not self.object.course:  # 增加课程存在性校验
+            raise Http404("讨论主题未关联有效课程")
+        return context
+
+class CreatePostView(LoginRequiredMixin, CreateView):
+    model = DiscussionPost
+    fields = ['content']
+    template_name = 'student/create_post.html'
+
+    def form_valid(self, form):
+        form.instance.topic = get_object_or_404(DiscussionTopic, pk=self.kwargs['pk'])
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['topic'] = get_object_or_404(DiscussionTopic, pk=self.kwargs['pk'])
+        return context
 

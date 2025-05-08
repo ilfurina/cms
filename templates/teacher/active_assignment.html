@@ -3,73 +3,94 @@
 
 {% block option %}
 
-{#                    <div class="container-fluid">#}
-                    <div class="d-flex justify-content-between mb-4">
-                        <div class="btn-group" role="group">
-                            <a href="{% url 'teacher:active_assignments' current_course.course_id %}"
-                               class="btn {% if request.resolver_match.url_name == 'active_assignments' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                                进行中的任务
-                            </a>
-                            <a href="{% url 'teacher:create_assignment' current_course.course_id %}"
-                               class="btn {% if request.resolver_match.url_name == 'create_assignment' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                                发布新任务
-                            </a>
-                        </div>
-                        <div>
-                            <span class="badge bg-info">总任务数：{{ assignments|length }}</span>
-                        </div>
-                    </div>
+    {#                    <div class="container-fluid">#}
+    <div class="d-flex justify-content-between mb-4">
+        <div class="btn-group" role="group">
+            <a href="{% url 'teacher:active_assignments' current_course.course_id %}"
+               class="btn {% if request.resolver_match.url_name == 'active_assignments' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                进行中的任务
+            </a>
+            <a href="{% url 'teacher:create_assignment' current_course.course_id %}"
+               class="btn {% if request.resolver_match.url_name == 'create_assignment' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                发布新任务
+            </a>
+        </div>
+        <div>
+            <span class="badge bg-info">总任务数：{{ assignments|length }}</span>
+        </div>
+    </div>
 
-{#                    {% block assignment_content %}{% endblock %}#}
-{#                </div>#}
+    {#                    {% block assignment_content %}{% endblock %}#}
+    {#                </div>#}
 
-<div class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
                     <tr>
                         <th>任务名称</th>
                         <th>类型</th>
                         <th>状态</th>
                         <th>时间范围</th>
                         <th>操作</th>
+                        <th></th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     {% for assignment in assignments %}
-                    <tr>
-                        <td>{{ assignment.title }}</td>
-                        <td>{{ assignment.get_assignment_type_display }}</td>
-                        <td>
-                            {% if now < assignment.start_time %}
-                                <span class="badge bg-secondary">未开始</span>
-                            {% elif assignment.end_time < now %}
-                                <span class="badge bg-danger">已结束</span>
-                            {% else %}
-                                <span class="badge bg-success">进行中</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {{ assignment.start_time|date:"m/d H:i" }} -
-                            {{ assignment.end_time|date:"m/d H:i" }}
-                        </td>
-<td>
-    <a href="{% url 'teacher:assignment_detail' course_id=current_course.course_id assignment_id=assignment.id %}"
-       class="btn btn-sm btn-outline-primary">
-        <i class="bi bi-gear"></i> 管理
-    </a>
-</td>
+                        <tr>
+                            <td>{{ assignment.title }}</td>
+                            <td>{{ assignment.get_assignment_type_display }}</td>
+                            <td>
+                                {% if now < assignment.start_time %}
+                                    <span class="badge bg-secondary">未开始</span>
+                                {% elif assignment.end_time < now %}
+                                    <span class="badge bg-danger">已结束</span>
+                                {% else %}
+                                    <span class="badge bg-success">进行中</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ assignment.start_time|date:"m/d H:i" }} -
+                                {{ assignment.end_time|date:"m/d H:i" }}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i> 删除
+                                </button>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="
+{#{% url 'teacher:assignment_detail' course_id=current_course.course_id assignment_id=assignment.id %}#}
+"
+                                       class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="bi bi-info-circle"></i> 详情
+                                    </a>
+                                    <a href="{% url 'teacher:assignment_progress' assignment_id=assignment.id %}"
+                                       class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-bar-chart-line"></i> 完成情况
+                                    </a>
 
-                    </tr>
+                                </div>
+                            </td>
+                            {#<td>#}
+                            {#    <a href="{% url 'teacher:assignment_detail' course_id=current_course.course_id assignment_id=assignment.id %}"#}
+                            {#       class="btn btn-sm btn-outline-primary">#}
+                            {#        <i class="bi bi-gear"></i> 管理#}
+                            {#    </a>#}
+                            {#</td>#}
+
+                        </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">暂无任务记录</td>
-                    </tr>
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">暂无任务记录</td>
+                        </tr>
                     {% endfor %}
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}

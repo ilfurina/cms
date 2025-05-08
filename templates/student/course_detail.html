@@ -13,7 +13,7 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="tasks-tab" data-bs-toggle="tab"
                         data-bs-target="#tasks" type="button" role="tab">
-                    <i class="bi bi-list-task"></i> 任务
+                    <i class="bi bi-list-task"></i> 作业
                 </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -24,10 +24,23 @@
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="more-tab" data-bs-toggle="tab"
-                        data-bs-target="#more" type="button" role="tab">
-                    <i class="bi bi-three-dots"></i> 更多
+                        data-bs-target="#attendance" type="button" role="tab">
+                    <i class="bi bi-three-dots"></i> 签到
                 </button>
             </li>
+            <li class="nav-item">
+                <button class="nav-link" id="discussion-tab" data-bs-toggle="tab"
+                        data-bs-target="#report" type="button">
+                    <i class="bi bi-chat-left-text"></i> 实验报告
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="discussion-tab" data-bs-toggle="tab"
+                        data-bs-target="#discussion" type="button">
+                    <i class="bi bi-chat-left-text"></i> 课程讨论
+                </button>
+            </li>
+
         </ul>
 
         <!-- 选项卡内容 -->
@@ -49,17 +62,22 @@
                                             时间：{{ assignment.start_time|date }} - {{ assignment.end_time|date }}
                                         </small>
                                         <div class="mt-2">
-                                            {% if now < assignment.start_time %}
-                                                <span class="badge bg-secondary">未开始</span>
-                                            {% elif now > assignment.end_time %}
-                                                <span class="badge bg-danger">已结束</span>
+                                            {% if assignment.id in submitted_assignments %}
+                                                <span class="badge bg-success">已完成</span>
                                             {% else %}
-                                                <a href="{% url 'student:assignment_detail' assignment.id %}"
-                                                   class="btn btn-sm btn-primary">
-                                                    <i class="bi bi-pencil"></i> 开始作答
-                                                </a>
+                                                {% if now < assignment.start_time %}
+                                                    <span class="badge bg-secondary">未开始</span>
+                                                {% elif now > assignment.end_time %}
+                                                    <span class="badge bg-danger">已结束</span>
+                                                {% else %}
+                                                    <a href="{% url 'student:assignment_detail' assignment.id %}"
+                                                       class="btn btn-sm btn-primary">
+                                                        <i class="bi bi-pencil"></i> 开始作答
+                                                    </a>
+                                                {% endif %}
                                             {% endif %}
                                         </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -90,34 +108,51 @@
                 </div>
             </div>
 
-            <!-- 更多面板 -->
-            <div class="tab-pane fade" id="more" role="tabpanel">
+            <!-- 签到面板 -->
+            <div class="tab-pane fade" id="attendance" role="tabpanel">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="card h-100">
                             <div class="card-body text-center">
-                                <h5><i class="bi bi-download"></i> 资料包</h5>
-                                <button class="btn btn-outline-primary mt-2">
-                                    下载全部课程资料
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <h5><i class="bi bi-people"></i> 学习小组</h5>
-                                <div class="mt-2">
-                                    <span class="badge bg-info">当前成员：15人</span>
-                                </div>
-                                <button class="btn btn-outline-success mt-2">
-                                    加入小组
-                                </button>
+                                暂无签到任务
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- 实验报告面板 -->
+            <div class="tab-pane fade" id="report" role="tabpanel">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                暂无实验报告
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 讨论面板 -->
+            <div class="tab-pane fade" id="discussion" role="tabpanel">
+                <div class="list-group">
+                    {% for discussion in course.discussions.all %}
+                        <a href="{% url 'student:discussion_detail' discussion.id %}"
+                           class="list-group-item list-group-item-action">
+                            <h6>{{ discussion.title }}</h6>
+                            <small class="text-muted">
+                                教师：{{ discussion.created_by.name }} ·
+                                回复数 {{ discussion.posts.count }}
+                            </small>
+                        </a>
+                    {% empty %}
+                        <div class="alert alert-info">暂无讨论主题</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+
         </div>
     </div>
 

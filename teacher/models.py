@@ -77,63 +77,102 @@ class CourseResource(models.Model):
         return self.filename.split('.')[-1] if '.' in self.filename else ''
 
 # 习题库模型
-from django.contrib.auth import get_user_model
+class QuestionBase(models.Model):
+    QUESTION_TYPES = [
+        ('single', '单选题'),
+        ('multiple', '多选题'),
+        ('fill', '填空题'),
+        ('essay', '问答题')
+    ]
 
-User = get_user_model()
-# 后续试一下注释掉此行直接使用模型中的User是否可行
-
-class Question(models.Model):
-    QUESTION_TYPES = (
-        ('SC', '单选题'),
-        ('MC', '多选题'),
-        ('FB', '填空题'),
-        ('QA', '问答题'),
-    )
-
-    teacher = models.ForeignKey(User, on_delete=models.CASCADE)
-    type = models.CharField(max_length=2, choices=QUESTION_TYPES)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE,null=True, blank=True)
+    question_type = models.CharField(max_length=20, choices=QUESTION_TYPES)
     content = models.TextField(verbose_name="题目内容")
-
-    # 用于选择题的选项（JSON存储）
-    options = models.JSONField(null=True, blank=True)
-
-    # 答案存储（根据题目类型不同格式不同）
-    answer = models.TextField()
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-created_at']
-        verbose_name = "题目"
-        verbose_name_plural = "题库"
+
+class SingleChoiceQuestion(QuestionBase):
+    options = models.JSONField(verbose_name="选项列表")  # 格式：["选项A", "选项B"...]
+    correct_answer = models.CharField(max_length=10, verbose_name="正确答案")
+
+class MultipleChoiceQuestion(QuestionBase):
+    options = models.JSONField(verbose_name="选项列表")
+    correct_answers = models.JSONField(verbose_name="正确答案集合")  # 格式：["A", "B"]
+
+class FillInBlankQuestion(QuestionBase):
+    correct_answer = models.TextField(verbose_name="参考答案")
+    keywords = models.JSONField(null=True, verbose_name="关键词")  # 自动评分用
+
+class EssayQuestion(QuestionBase):
+    reference_answer = models.TextField(verbose_name="参考答案")
+    scoring_rubric = models.JSONField(null=True, verbose_name="评分标准")
 
 
-class Exercise(models.Model):
-    teacher = models.ForeignKey(User, on_delete=models.CASCADE)
-    course = models.ForeignKey('Course', on_delete=models.CASCADE)
+class Assignment(models.Model):
+    ASSIGNMENT_TYPES = [
+        ('homework', '作业'),
+        ('exam', '考试')
+    ]
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
-    questions = models.ManyToManyField(Question, through='ExerciseQuestionRelation')
+    description = models.TextField()
+    assignment_type = models.CharField(max_length=20, choices=ASSIGNMENT_TYPES)
+    questions = models.ManyToManyField(QuestionBase, through='AssignmentQuestion')
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+
+
+    def status_badge(self):
+        now = timezone.now()
+        if now < self.start_time:
+            return '<span class="badge bg-secondary">未开始</span>'
+        elif self.start_time <= now <= self.end_time:
+            return '<span class="badge bg-success">进行中</span>'
+        else:
+            return '<span class="badge bg-danger">已结束</span>'
+    status_badge.allow_tags = True
+
+    def student_count(self):
+        return self.course.students.count()
+
+
+class AssignmentQuestion(models.Model):
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
+    question = models.ForeignKey(QuestionBase, on_delete=models.CASCADE)
+    points = models.PositiveIntegerField(default=10)
+    order = models.PositiveIntegerField(default=0)
+
+class ReportAssignment(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='reports')
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    attachment = models.FileField(upload_to='reports/assignments/%Y/%m/', blank=True, null=True)
+    created_by = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    deadline = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
-    published_at = models.DateTimeField(null=True, blank=True)
-    is_published = models.BooleanField(default=False)
 
-    class Meta:
-        ordering = ['-created_at']
-        verbose_name = "习题任务"
-        verbose_name_plural = "习题集"
+    def status(self):
+        now = timezone.now()
+        if now > self.deadline:
+            return '已截止'
+        return '进行中'
 
-# 中间模型，用于记录将题库中的题目加入习题任务发布时的一些关联信息
-class ExerciseQuestionRelation(models.Model):
-    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    score = models.PositiveSmallIntegerField(default=10, verbose_name="题目分值")
-    order = models.PositiveIntegerField(default=0, verbose_name="题目顺序")
 
-    class Meta:
-        ordering = ['order']
+class DiscussionTopic(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='discussions')
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    created_by = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-# 实验报告
-
+class DiscussionPost(models.Model):
+    topic = models.ForeignKey(DiscussionTopic, on_delete=models.CASCADE, related_name='posts')
+    content = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE)  # 兼容教师和学生
+    parent_post = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)  # 回复功能
+    created_at = models.DateTimeField(auto_now_add=True)
 

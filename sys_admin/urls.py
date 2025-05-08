@@ -14,6 +14,9 @@ urlpatterns = [
     path('news_create/', views.news_create, name='news_create'),
     path('news_edit/<int:news_id>/', views.news_edit, name='news_edit'),
     path('news_delete/<int:news_id>/', views.news_delete, name='news_delete'),
-    path('news_detail/<news_id>', views.news_detail, name='news_detail')
+    path('news_detail/<news_id>', views.news_detail, name='news_detail'),
+    path('carousel_list/', views.carousel_list, name='carousel_list'),
+    path('create_carousel/', views.create_carousel, name='create_carousel'),
+    path('delete_carousel/<int:carousel_id>/', views.delete_carousel, name='delete_carousel'),
 
 ]
