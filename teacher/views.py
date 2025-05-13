@@ -3,10 +3,8 @@ from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from accounts.decorators import teacher_required
 import random
-
 from student.models import Student
 from sys_admin.models import Major, College
-# from .forms import QuestionForm, ExerciseTaskForm
 from .models import Course, Attendance, CourseResource, Teacher
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
@@ -29,7 +27,6 @@ def info(request):
     return render(request, 'teacher/info.html', {'information': information})
 
 #教师创建课程
-# teacher/views.py
 def go_to_create(request):
     # 当前用户所属学院的全部专业
     if request.user.teacher.college:
@@ -67,17 +64,6 @@ def create_course(request):
 def edit_course(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
 
-    current_attendance = Attendance.objects.filter(
-        course=course,
-        is_active=True
-    ).order_by('-start_time').first()
-    remaining_seconds = 0
-    if current_attendance:
-        now = timezone.now()
-        elapsed = (now - current_attendance.start_time).total_seconds()
-        remaining = current_attendance.duration * 60 - elapsed
-        remaining_seconds = max(round(remaining), 0)
-
     if request.method == 'POST':
         course.name = request.POST.get('name')
         course.description = request.POST.get('description')
@@ -91,8 +77,6 @@ def edit_course(request, course_id):
     # 传递current_attendance到模板
     return render(request, 'teacher/course_edit.html', {
         'current_course': course,
-        'current_attendance': current_attendance,
-        'remaining_seconds': remaining_seconds,
         'resources': resources,
     })
 
@@ -122,21 +106,6 @@ def delete_course(request, course_id):
 
     return redirect('teacher:course_edit', course_id=course_id)
 
-
-@teacher_required
-def create_attendance(request, course_id):
-    course = get_object_or_404(Course, course_id=course_id)
-
-    if request.method == 'POST':
-        attendance = Attendance(course=course)
-        attendance.generate_code()
-        attendance.duration = request.POST.get('duration', 10)
-        attendance.save()
-        return redirect('teacher:edit', course_id=course_id)
-
-    # return render(request, 'teacher/attendance_form.html', {'course': course})
-
-
 def export_students(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     students = course.students.all()
@@ -161,7 +130,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 
 # 上传课程资源
-@login_required
+
 @require_POST
 def upload_resource(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
@@ -204,111 +173,44 @@ def resources(request, course_id):
 
 def attendance(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
-    attendances = Attendance.objects.filter(course=course)
+    # attendances = Attendance.objects.filter(course=course)
+    current_attendance = Attendance.objects.filter(
+        course=course,
+        is_active=True
+    ).order_by('-start_time').first()
+    remaining_seconds = 0
+    if current_attendance:
+        now = timezone.now()
+        elapsed = (now - current_attendance.start_time).total_seconds()
+        remaining = current_attendance.duration * 60 - elapsed
+        remaining_seconds = max(round(remaining), 0)
+
+        if remaining_seconds <= 0:
+            current_attendance.is_active = False
+            current_attendance.save()
+
     return render(request, 'teacher/attendance.html',
-          {'current_course': course, 'attendances': attendances})
+          {'current_course': course,
+           'current_attendance': current_attendance,
+           'remaining_seconds': remaining_seconds,
+           })
+@teacher_required
+def create_attendance(request, course_id):
+    course = get_object_or_404(Course, course_id=course_id)
+
+    if request.method == 'POST':
+        attendance = Attendance(course=course)
+        attendance.generate_code()
+        attendance.duration = request.POST.get('duration', 10)
+        attendance.save()
+        return redirect('teacher:attendance', course_id=course_id)
+
+    # return render(request, 'teacher/attendance_form.html', {'course': course})
 
 def reports(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
 
     return render(request, 'teacher/report_list.html', {'current_course': course})
-
-
-from django.views import View
-from django.shortcuts import get_object_or_404
-from teacher.models import (
-    Course,
-    QuestionBase,
-    SingleChoiceQuestion,
-    MultipleChoiceQuestion,
-    FillInBlankQuestion,
-    EssayQuestion,
-    Assignment,
-    AssignmentQuestion
-)
-
-
-
-class CreateAssignmentView(View):
-    def get(self, request, course_id):
-        course = get_object_or_404(Course, course_id=course_id)
-        # teacher = get_object_or_404(Teacher, teacher_id=request.user.teacher.teacher_id)
-
-
-        questions = QuestionBase.objects.filter(teacher=request.user.teacher).prefetch_related(
-            'singlechoicequestion',
-            'multiplechoicequestion',
-            'fillinblankquestion',
-            'essayquestion'
-        )
-        # questions = (QuestionBase.objects.filter(teacher=request.user.teacher)
-        #              .non_polymorphic().instance_of(SingleChoiceQuestion, MultipleChoiceQuestion, FillInBlankQuestion, EssayQuestion))
-
-        # 获取已选中的题目
-        selected = request.GET.getlist('selected')
-        selected_questions = QuestionBase.objects.filter(id__in=selected)
-
-        return render(request, 'teacher/create_exercises.html', {
-            'current_course': course,
-            'questions': questions,
-            'selected_questions': selected_questions
-        })
-
-    # post 方法保持不变...
-
-    def post(self, request, course_id):
-        course = get_object_or_404(Course, course_id=course_id)
-
-        # 创建作业
-        assignment = Assignment.objects.create(
-            course=course,
-            title=request.POST['title'],
-            description=request.POST.get('description', ''),
-            assignment_type='homework',
-            start_time=request.POST['start_time'],
-            end_time=request.POST['end_time']
-        )
-
-        # 关联题目
-        selected_questions = request.POST.getlist('questions')
-        for order, qid in enumerate(selected_questions, start=1):
-            question = QuestionBase.objects.get(id=qid)
-            AssignmentQuestion.objects.create(
-                assignment=assignment,
-                question=question,
-                points=10,  # 默认分值
-                order=order
-            )
-
-        return redirect('teacher:edit', course_id=course_id)
-
-
-from django.utils import timezone
-
-
-class ActiveAssignmentsView(View):
-    def get(self, request, course_id):
-        course = get_object_or_404(Course, course_id=course_id)
-        now = timezone.localtime()
-
-        # 获取所有任务并按状态分类
-        assignments = Assignment.objects.filter(course=course).order_by('-start_time')
-
-        # 转换作业时间为本地时区
-        # for assignment in assignments:
-        #     assignment.start_time = timezone.localtime(assignment.start_time)
-        #     assignment.end_time = timezone.localtime(assignment.end_time)
-
-        return render(request, 'teacher/active_assignment.html', {
-            'current_course': course,
-            'assignments': assignments,
-            'now': now  # 传递当前时间到模板
-        })
-
-# 题库导入功能
-
-# 从题库中选择题目创建作业功能
-
 
 def import_by_student_id(request):
     course_id = request.POST.get('course_id')
@@ -365,51 +267,6 @@ def delete_student(request, course_id,student_id):
     course.save()
 
     return redirect('teacher:students', course_id=course_id)
-
-
-from django.db.models import Count
-from django.http import Http404
-
-
-@teacher_required
-def assignment_progress(request, assignment_id):
-    assignment = get_object_or_404(Assignment, id=assignment_id)
-    course = assignment.course
-
-    # 验证教师权限
-    if course.teacher != request.user.teacher:
-        raise Http404
-
-    # 获取已提交学生
-    submitted = Student.objects.filter(
-        assignmentsubmission__assignment=assignment,
-        assignmentsubmission__is_submitted=1
-    ).distinct()
-
-    # 获取未提交学生
-    all_students = course.students.all()
-    not_submitted = all_students.difference(submitted)
-
-    # 统计比例
-    total = all_students.count()
-    submitted_count = submitted.count()
-    not_submitted_count = total - submitted_count
-
-    # 图表数据
-    chart_data = {
-        'labels': ['已完成', '未完成'],
-        'datasets': [{
-            'data': [submitted_count, not_submitted_count],
-            'backgroundColor': ['#36a2eb', '#ff6384']
-        }]
-    }
-
-    return render(request, 'teacher/assignment_progress.html', {
-        'assignment': assignment,
-        'submitted_students': submitted,
-        'not_submitted_students': not_submitted,
-        'chart_data': chart_data
-    })
 
 from django.views.generic import CreateView, ListView
 from teacher.models import ReportAssignment

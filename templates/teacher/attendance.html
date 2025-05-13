@@ -17,18 +17,26 @@
             </form>
 
             <!-- 实时签到面板 -->
-            {% if current_attendance %}
-                <div class="mt-4 p-3 border rounded bg-light">
-                    <h6>进行中的签到</h6>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <span class="badge bg-success">验证码：{{ current_attendance.checkin_code }}</span>
-                            <span class="ms-3">剩余时间：<span id="countdown">10:00</span></span>
-                        </div>
 
+                {% if current_attendance %}
+                    <div class="mt-4 p-3 border rounded bg-light">
+                        <h6>进行中的签到</h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-success">验证码：{{ current_attendance.checkin_code }}</span>
+                                <span class="ms-3">剩余时间：<span id="countdown">
+                                    {% if current_attendance and current_attendance.is_active%}
+                                        {{ current_attendance.remaining_seconds }}
+                                    {% else %}
+                                        已结束
+                                    {% endif %}
+                            </span></span>
+                            </div>
+
+                        </div>
                     </div>
-                </div>
-            {% endif %}
+                {% endif %}
+
         </div>
     </div>
 {% endblock %}
@@ -36,27 +44,24 @@
 {% block extra_js %}
     <script>
         function startCountdown(totalSeconds) {
-            let timer = totalSeconds, minutes, seconds;
             const countdownElement = document.getElementById('countdown');
+            let timer = totalSeconds;
 
-            const interval = setInterval(function () {
-                minutes = parseInt(timer / 60, 10);
-                seconds = parseInt(timer % 60, 10);
+            const interval = setInterval(() => {
+                const minutes = String(Math.floor(timer / 60)).padStart(2, '0');
+                const seconds = String(timer % 60).padStart(2, '0');
 
-                minutes = minutes < 10 ? "0" + minutes : minutes;
-                seconds = seconds < 10 ? "0" + seconds : seconds;
-
-                countdownElement.textContent = minutes + ":" + seconds;
+                countdownElement.textContent = `${minutes}:${seconds}`;
 
                 if (--timer < 0) {
                     clearInterval(interval);
                     countdownElement.textContent = "已结束";
-                    location.reload()
+                    location.reload();  // 自动刷新更新状态
                 }
             }, 1000);
         }
 
-        // 初始化逻辑修改
+
         {% if current_attendance and remaining_seconds > 0 %}
             startCountdown({{ remaining_seconds }});
         {% endif %}

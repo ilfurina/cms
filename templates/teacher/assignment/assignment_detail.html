@@ -1,0 +1,66 @@
+{% extends 'teacher/course_edit.html' %}
+
+{% load static %}
+
+{% block option %}
+
+
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">{{ assignment.title }}</h4>
+        <div class="row">
+            <div class="col-md-6">
+                <canvas id="submissionChart" width="400" height="400"></canvas>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">统计数据</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                总人数: {{ chart_data.data.0|add:chart_data.data.1 }}
+                            </li>
+                            <li class="list-group-item text-success">
+                                已提交: {{ chart_data.data.0 }}
+                            </li>
+                            <li class="list-group-item text-danger">
+                                未提交: {{ chart_data.data.1 }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="{% static 'js/chart.js' %}"></script>
+<script>
+    const ctx = document.getElementById('submissionChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: {{ chart_data.labels|safe }},
+            datasets: [{
+                data: {{ chart_data.data|safe }},
+                backgroundColor: {{ chart_data.backgroundColor|safe }},
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: '作业提交情况统计'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

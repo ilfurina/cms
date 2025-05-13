@@ -26,7 +26,7 @@ class Major(models.Model):
 
 class News(models.Model):
     title = models.CharField(max_length=100,unique=True)
-    news_file = models.FileField(upload_to='static/news/', blank=True)
+    news_file = models.FileField(upload_to='files/news/', blank=True)
     content = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

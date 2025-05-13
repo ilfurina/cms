@@ -1,129 +1,137 @@
-# from django import forms
-# from django.shortcuts import redirect, render, get_object_or_404
-# from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
-# from django.urls import reverse_lazy
-# from .models import QuestionBank, SingleChoiceQuestion, MultipleChoiceQuestion, FillInBlankQuestion, EssayQuestion, \
-#     Question
-# from django.contrib import messages
-# from django.http import JsonResponse
-#
-#
-# class QuestionBankListView(ListView):
-#     model = QuestionBank
-#     template_name = 'teacher/exer/question_bank_list.html'
-#
-#     def get_queryset(self):
-#         return QuestionBank.objects.filter(teacher=self.request.user.teacher)
-#
-#
-# class CreateQuestionBankView(CreateView):
-#     model = QuestionBank
-#     fields = ['name']
-#     template_name = 'teacher/exer/create_question_bank.html'
-#
-#     def form_valid(self, form):
-#         form.instance.teacher = self.request.user.teacher
-#         return super().form_valid(form)
-#
-#     def get_success_url(self):
-#         return reverse_lazy('teacher:question_bank_detail', kwargs={'pk': self.object.pk})
-#
-#
-# class QuestionBankDetailView(DetailView):
-#     model = QuestionBank
-#     template_name = 'teacher/exer/question_bank_detail.html'
-#
-#
-# # 公共题目表单基类
-# class BaseQuestionForm(forms.ModelForm):
-#     class Meta:
-#         model = Question
-#         fields = ['content', 'difficulty']
-#
-#
-# # 各题型表单
-# class SingleChoiceForm(BaseQuestionForm):
-#     options = forms.JSONField(
-#         help_text='格式示例：["选项A", "选项B", "选项C"]',
-#         widget=forms.TextInput(attrs={'placeholder': '输入选项列表'})
-#     )
-#     correct_answer = forms.CharField(max_length=200)
-#
-#
-# class MultipleChoiceForm(BaseQuestionForm):
-#     options = forms.JSONField(
-#         help_text='格式示例：["选项A", "选项B", "选项C"]',
-#         widget=forms.TextInput(attrs={'placeholder': '输入选项列表'})
-#     )
-#     correct_answers = forms.JSONField(
-#         help_text='格式示例：[0,2] 对应正确选项的索引',
-#         widget=forms.TextInput(attrs={'placeholder': '输入正确选项索引列表'})
-#     )
-#
-#
-# class FillInBlankForm(BaseQuestionForm):
-#     correct_keywords = forms.JSONField(
-#         help_text='格式示例：["关键词1", "关键词2"]',
-#         widget=forms.TextInput(attrs={'placeholder': '输入正确关键词列表'})
-#     )
-#
-#
-# class EssayForm(BaseQuestionForm):
-#     reference_answer = forms.CharField(widget=forms.Textarea)
-#     max_score = forms.IntegerField(min_value=1, initial=10)
-#
-#
-# def add_question(request, bank_id):
-#     bank = get_object_or_404(QuestionBank, pk=bank_id)
-#     question_type = request.POST.get('question_type')
-#
-#     form_classes = {
-#         'S': SingleChoiceForm,
-#         'M': MultipleChoiceForm,
-#         'F': FillInBlankForm,
-#         'Q': EssayForm
-#     }
-#     question_type = request.GET.get('type') or request.POST.get('question_type', 'S')
-#
-#     if request.method == 'POST':
-#         form = form_classes[question_type](request.POST)
-#         # 显式创建子类实例
-#         if form.is_valid():
-#             data = form.cleaned_data
-#             # 根据题型创建具体子类
-#             question_class = {
-#                 'S': SingleChoiceQuestion,
-#                 'M': MultipleChoiceQuestion,
-#                 'F': FillInBlankQuestion,
-#                 'Q': EssayQuestion
-#             }[question_type]
-#
-#             question = question_class(
-#                 bank=bank,
-#                 content=data['content'],
-#                 difficulty=data['difficulty'],
-#                 # 添加各题型特有字段
-#                 options=data.get('options'),
-#                 correct_answer=data.get('correct_answer'),
-#                 correct_answers=data.get('correct_answers'),
-#                 correct_keywords=data.get('correct_keywords'),
-#                 reference_answer=data.get('reference_answer')
-#             )
-#             question.save()
-#
-#
-#             return redirect('teacher:question_bank_detail', pk=bank_id)
-#         else:
-#             # 添加错误提示
-#             messages.error(request, f'表单验证失败：{form.errors}')
-#
-#     else:
-#         form = form_classes[question_type]()  # 初始化对应表单
-#
-#
-#     return render(request, 'teacher/exer/add_question.html', {
-#         'bank': bank,
-#         'form': form,
-#         'question_types': Question.BANK_TYPE_CHOICES,
-#         'selected_type': question_type  # 用于保持选项选中状态
-#     })
+from django.views import View
+from django.shortcuts import get_object_or_404, render, redirect
+from django.utils import timezone
+from accounts.decorators import teacher_required
+from student.models import Student
+from teacher.models import (
+    Course,
+    QuestionBase,
+    SingleChoiceQuestion,
+    MultipleChoiceQuestion,
+    FillInBlankQuestion,
+    EssayQuestion,
+    Assignment,
+    AssignmentQuestion
+)
+
+
+class CreateAssignmentView(View):
+    def get(self, request, course_id):
+        course = get_object_or_404(Course, course_id=course_id)
+        # teacher = get_object_or_404(Teacher, teacher_id=request.user.teacher.teacher_id)
+
+
+        questions = QuestionBase.objects.filter(teacher=request.user.teacher).prefetch_related(
+            'singlechoicequestion',
+            'multiplechoicequestion',
+            'fillinblankquestion',
+            'essayquestion'
+        )
+        # questions = (QuestionBase.objects.filter(teacher=request.user.teacher)
+        #              .non_polymorphic().instance_of(SingleChoiceQuestion, MultipleChoiceQuestion, FillInBlankQuestion, EssayQuestion))
+
+        # 获取已选中的题目
+        selected = request.GET.getlist('selected')
+        selected_questions = QuestionBase.objects.filter(id__in=selected)
+
+        return render(request, 'teacher/assignment/create_exercises.html', {
+            'current_course': course,
+            'questions': questions,
+            'selected_questions': selected_questions
+        })
+
+    def post(self, request, course_id):
+        course = get_object_or_404(Course, course_id=course_id)
+
+        # 创建作业
+        assignment = Assignment.objects.create(
+            course=course,
+            title=request.POST['title'],
+            description=request.POST.get('description', ''),
+            assignment_type='homework',
+            start_time=request.POST['start_time'],
+            end_time=request.POST['end_time']
+        )
+
+        # 关联题目
+        selected_questions = request.POST.getlist('questions')
+        for order, qid in enumerate(selected_questions, start=1):
+            question = QuestionBase.objects.get(id=qid)
+            AssignmentQuestion.objects.create(
+                assignment=assignment,
+                question=question,
+                points=10,  # 默认分值
+                order=order
+            )
+
+        return redirect('teacher:edit', course_id=course_id)
+
+
+
+
+class ActiveAssignmentsView(View):
+    def get(self, request, course_id):
+        course = get_object_or_404(Course, course_id=course_id)
+        now = timezone.localtime()
+
+        # 获取所有任务并按状态分类
+        assignments = Assignment.objects.filter(course=course).order_by('-start_time')
+
+        # 转换作业时间为本地时区
+        # for assignment in assignments:
+        #     assignment.start_time = timezone.localtime(assignment.start_time)
+        #     assignment.end_time = timezone.localtime(assignment.end_time)
+
+        return render(request, 'teacher/assignment/active_assignment.html', {
+            'current_course': course,
+            'assignments': assignments,
+            'now': now  # 传递当前时间到模板
+        })
+
+# 题库导入功能
+
+# 从题库中选择题目创建作业功能
+
+from django.db.models import Count
+from django.http import Http404
+
+
+@teacher_required
+def assignment_progress(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    course = assignment.course
+
+    # 验证教师权限
+    if course.teacher != request.user.teacher:
+        raise Http404
+
+    # 获取已提交学生
+    submitted = Student.objects.filter(
+        assignmentsubmission__assignment=assignment,
+        assignmentsubmission__is_submitted=1
+    ).distinct()
+
+    # 获取未提交学生
+    all_students = course.students.all()
+    not_submitted = all_students.difference(submitted)
+
+    # 统计比例
+    total = all_students.count()
+    submitted_count = submitted.count()
+    not_submitted_count = total - submitted_count
+
+    # 图表数据
+    chart_data = {
+        'labels': ['已完成', '未完成'],
+        'datasets': [{
+            'data': [submitted_count, not_submitted_count],
+            'backgroundColor': ['#36a2eb', '#ff6384']
+        }]
+    }
+
+    return render(request, 'teacher/assignment/assignment_progress.html', {
+        'assignment': assignment,
+        'submitted_students': submitted,
+        'not_submitted_students': not_submitted,
+        'chart_data': chart_data
+    })

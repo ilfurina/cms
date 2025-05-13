@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+
+
 from cms import views
 
 
@@ -27,4 +29,5 @@ urlpatterns = [
     path('student/', include('student.urls')),
     path('info/', views.info,name='info'),
     path('admin/',include('sys_admin.urls')),
+
 ]

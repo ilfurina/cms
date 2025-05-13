@@ -22,7 +22,8 @@ from .recommender import CourseRecommender
 def dashboard(request):
     student = request.user.student
     enrolled_courses = student.courses.all()
-    recommended_courses = CourseRecommender.get_recommendations(student)
+    recommender = CourseRecommender()
+    recommended_courses = recommender.get_recommendations(student)
     return render(request, 'student/dashboard.html', {
         'enrolled_courses': enrolled_courses,
         'recommended_courses': recommended_courses,

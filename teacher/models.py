@@ -19,7 +19,6 @@ class Teacher(models.Model):
     college = models.ForeignKey(College, on_delete=models.CASCADE,null=True, blank=True)#学院
 
 
-
 class Course(models.Model):
     course_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
@@ -48,7 +47,7 @@ class Course(models.Model):
         return self.name
 
 
-
+# 签到
 class Attendance(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='attendances')
     title = models.CharField(max_length=100, default="课堂签到")
@@ -65,16 +64,13 @@ class Attendance(models.Model):
 
 class CourseResource(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='resources')
-    file = models.FileField(upload_to='course_resources/%Y/%m/')
+    file = models.FileField(upload_to='files/course_resources/%Y/%m/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     @property
     def filename(self):
         return os.path.basename(self.file.name)
 
-    @property
-    def file_extension(self):
-        return self.filename.split('.')[-1] if '.' in self.filename else ''
 
 # 习题库模型
 class QuestionBase(models.Model):
@@ -150,7 +146,7 @@ class ReportAssignment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='reports')
     title = models.CharField(max_length=200)
     description = models.TextField()
-    attachment = models.FileField(upload_to='reports/assignments/%Y/%m/', blank=True, null=True)
+    attachment = models.FileField(upload_to='files/reports/assignments/%Y/%m/', blank=True, null=True)
     created_by = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     deadline = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
