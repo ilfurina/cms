@@ -17,5 +17,8 @@ urlpatterns = [
          name='discussion_detail'),
     path('discussion/<int:pk>/reply/', views.CreatePostView.as_view(),
          name='create_post'),
+    path('upload_face/', views.upload_face, name='upload_face'),
+    path('start_capture/', views.start_capture, name='start_capture'),
+    path('check_in/<int:course_id>/', views.check_in, name='check_in'),
 
 ]

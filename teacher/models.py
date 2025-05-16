@@ -1,4 +1,6 @@
 import random
+import string
+
 from django.db import models
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -17,6 +19,23 @@ class Teacher(models.Model):
     teacher_id = models.CharField(max_length=100, primary_key=True) #教师工号
     name = models.CharField(max_length=100)  #用户姓名
     college = models.ForeignKey(College, on_delete=models.CASCADE,null=True, blank=True)#学院
+
+# 课程申请模型
+class CourseApplication(models.Model):
+    STATUS_CHOICES = [
+        ('pending', '待审核'),
+        ('approved', '已通过'),
+        ('rejected', '已拒绝')
+    ]
+    course_id = models.IntegerField(unique=True)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    major = models.ForeignKey(Major, on_delete=models.CASCADE)
+    description = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    admin_comment = models.TextField(null=True, blank=True)
 
 
 class Course(models.Model):
@@ -48,6 +67,7 @@ class Course(models.Model):
 
 
 # 签到
+
 class Attendance(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='attendances')
     title = models.CharField(max_length=100, default="课堂签到")
@@ -55,11 +75,11 @@ class Attendance(models.Model):
     duration = models.PositiveIntegerField(default=10)  # 单位：分钟
     checkin_code = models.CharField(max_length=6)
     is_active = models.BooleanField(default=True)
-
-    def generate_code(self):
-        # 生成4位数字验证码
-        self.checkin_code = str(random.randint(1000, 9999))
-        return self.checkin_code
+    checked_students = models.ManyToManyField(
+        'student.Student',
+        related_name='attendances',
+        blank=True
+    )
 
 
 class CourseResource(models.Model):

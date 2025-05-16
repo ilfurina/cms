@@ -1,3 +1,5 @@
+import string
+
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
@@ -5,7 +7,7 @@ from accounts.decorators import teacher_required
 import random
 from student.models import Student
 from sys_admin.models import Major, College
-from .models import Course, Attendance, CourseResource, Teacher
+from .models import Course, Attendance, CourseResource, Teacher, CourseApplication
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 import csv
@@ -27,14 +29,19 @@ def info(request):
     return render(request, 'teacher/info.html', {'information': information})
 
 #教师创建课程
-def go_to_create(request):
-    # 当前用户所属学院的全部专业
-    if request.user.teacher.college:
-        college = request.user.teacher.college
-        majors = Major.objects.filter(college=college)
-    return render(request, 'teacher/create_course.html', {'majors': majors})
+# def go_to_create(request):
+#     # 当前用户所属学院的全部专业
+#     if request.user.teacher.college:
+#         college = request.user.teacher.college
+#         majors = Major.objects.filter(college=college)
+#     return render(request, 'teacher/create_course.html', {'majors': majors})
 
 def create_course(request):
+    if request.method == 'GET':
+        college = request.user.teacher.college
+        majors = Major.objects.filter(college=college)
+        return render(request, 'teacher/create_course.html', {'majors': majors})
+
     if request.method == 'POST':
 
         name = request.POST.get('name')
@@ -51,7 +58,7 @@ def create_course(request):
                 break
         description = request.POST.get('description')
         teacher = request.user.teacher
-        Course.objects.create(
+        CourseApplication.objects.create(
             major=major,
             course_id=course_id,
             name=name,
@@ -200,7 +207,7 @@ def create_attendance(request, course_id):
 
     if request.method == 'POST':
         attendance = Attendance(course=course)
-        attendance.generate_code()
+        attendance.checkin_code = "".join(random.sample(string.digits, 4))
         attendance.duration = request.POST.get('duration', 10)
         attendance.save()
         return redirect('teacher:attendance', course_id=course_id)

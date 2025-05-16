@@ -18,5 +18,7 @@ urlpatterns = [
     path('carousel_list/', views.carousel_list, name='carousel_list'),
     path('create_carousel/', views.create_carousel, name='create_carousel'),
     path('delete_carousel/<int:carousel_id>/', views.delete_carousel, name='delete_carousel'),
+    path('course_applications/', views.course_applications, name='course_applications'),
+    path('process_application/<int:app_id>/', views.process_application, name='process_application'),
 
 ]

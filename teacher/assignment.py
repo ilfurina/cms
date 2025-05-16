@@ -3,6 +3,9 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
 from accounts.decorators import teacher_required
 from student.models import Student
+from django.db.models import Count
+from django.http import Http404
+
 from teacher.models import (
     Course,
     QuestionBase,
@@ -91,10 +94,6 @@ class ActiveAssignmentsView(View):
 # 题库导入功能
 
 # 从题库中选择题目创建作业功能
-
-from django.db.models import Count
-from django.http import Http404
-
 
 @teacher_required
 def assignment_progress(request, assignment_id):

@@ -1,7 +1,12 @@
-from django.shortcuts import render, redirect
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+
+from teacher.models import Course, CourseApplication
 from .models import College, Major, News
 from django.core.files.base import ContentFile
 from .models import Carousel
+# from teacher.models import CourseApplication, Course
 
 
 def dashboard(request):
@@ -102,4 +107,38 @@ def delete_carousel(request, carousel_id):
     carousel.image.delete()  # 删除图片文件
     carousel.delete()
     return redirect('admin:carousel_list')
+
+# 课程申请
+def course_applications(request):
+    applications = CourseApplication.objects.filter(status='pending')
+    return render(request, 'admin/course_applications.html',
+                  {'applications': applications})
+
+
+def process_application(request, app_id):
+    app = get_object_or_404(CourseApplication, id=app_id)
+    if request.method == 'GET':
+        return render(request, 'admin/process_application.html', {'app': app})
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        comment = request.POST.get('comment', '')
+
+        if action == 'approve':
+            # 创建正式课程
+            Course.objects.create(
+                major=app.major,
+                name=app.name,
+                description=app.description,
+                teacher=app.teacher,
+                course_id=app.course_id
+            )
+            app.status = 'approved'
+        elif action == 'reject':
+            app.status = 'rejected'
+
+        app.admin_comment = comment
+        app.processed_at = timezone.now()
+        app.save()
+        return redirect('admin:course_applications')
 

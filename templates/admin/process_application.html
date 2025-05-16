@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3>处理课程申请</h3>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ app.name }}</h5>
+            <p class="card-text">
+                申请人：{{ app.teacher.name }}<br>
+                申请时间：{{ app.created_at|date:"Y-m-d H:i" }}<br>
+                课程描述：{{ app.description }}
+            </p>
+            <form method="post" action="{% url 'admin:process_application' app.id %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">处理意见</label>
+                    <select name="action" class="form-select">
+                        <option value="approve">通过申请</option>
+                        <option value="reject">拒绝申请</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">备注说明</label>
+                    <textarea name="comment" class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">提交处理</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -31,14 +31,22 @@
             top: -5px;
             z-index: 2;
         }
+        .title-card {
+        background: linear-gradient(135deg, #6c5ce7, #a66efa);
+        color: white;
+        padding: 12px 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
     </style>
 {% endblock %}
 
 {% block content %}
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>学生工作台</h2>
-            <h2>欢迎，{{ user.username }}同学</h2>
+            <h2 class="title-card">学生工作台</h2>
+            <h2>欢迎，{{ user.student.name }}同学</h2>
         </div>
 
         <!-- 加入课程表单 -->

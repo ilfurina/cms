@@ -9,7 +9,7 @@ class Student(models.Model):
     name = models.CharField(max_length=100)#姓名
     college = models.ForeignKey(College, on_delete=models.CASCADE,null=True, blank=True)
     major = models.ForeignKey(Major, on_delete=models.CASCADE,null=True, blank=True)
-
+    face_collected = models.BooleanField(default=False)
 
 class AssignmentSubmission(models.Model):
     assignment = models.ForeignKey('teacher.Assignment', on_delete=models.CASCADE)

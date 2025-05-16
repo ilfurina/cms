@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3>待审课程申请</h3>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>课程名称</th>
+                <th>申请教师</th>
+                <th>申请时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>{{ app.name }}</td>
+                <td>{{ app.teacher.name }}</td>
+                <td>{{ app.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <a href="{% url 'admin:process_application' app.id %}" 
+                       class="btn btn-sm btn-outline-primary">详情处理</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

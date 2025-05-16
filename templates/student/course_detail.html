@@ -110,16 +110,98 @@
 
             <!-- 签到面板 -->
             <div class="tab-pane fade" id="attendance" role="tabpanel">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                暂无签到任务
+                {% if attendance %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">课堂签到</h5>
+                        <div id="cameraPreview" class="mb-3 border p-2" style="width: 640px; height: 480px;"></div>
+                        <form id="checkinForm">
+                            <div class="mb-3">
+                                <label class="form-label">验证码</label>
+                                <input type="text" class="form-control" name="code" required>
                             </div>
-                        </div>
+                            <input type="hidden" name="image" id="capturedImage">
+                            <button type="button" class="btn btn-primary" onclick="startCheckIn()">
+                                <i class="bi bi-camera"></i> 开始签到
+                            </button>
+                        </form>
+                        <div id="resultMessage" class="mt-3"></div>
                     </div>
                 </div>
+                {% else %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">课堂签到</h5>
+                        <p class="card-text">当前没有进行中的签到。</p>
+                    </div>
+                </div>
+                {% endif %}
             </div>
+
+<script>
+// 全局变量用于管理摄像头
+let videoStream = null;
+
+async function startCheckIn() {
+    const code = document.querySelector('input[name="code"]').value;
+    const studentId = "{{ request.user.student.student_id }}";
+
+    try {
+        // 调用摄像头
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        videoStream = stream;
+        const video = document.createElement('video');
+        document.getElementById('cameraPreview').appendChild(video);
+        video.srcObject = stream;
+        await video.play();
+
+        // 捕获帧
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 480;
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // 转换为Base64
+        const imageData = canvas.toDataURL('image/jpeg');
+
+        // 关闭摄像头
+        videoStream.getTracks().forEach(track => track.stop());
+        document.getElementById('cameraPreview').innerHTML = '';
+
+        // 发送请求
+        const response = await fetch(`{% url 'student:check_in' course.course_id %}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                code: code,
+                image: imageData,
+                student_id: studentId
+            })
+        });
+
+        const result = await response.json();
+        showResultMessage(result);
+
+    } catch (error) {
+        console.error('Error:', error);
+        showResultMessage({success: false, error: '摄像头访问失败'});
+    }
+}
+
+function showResultMessage(result) {
+    const div = document.getElementById('resultMessage');
+    div.className = result.success ? 'alert alert-success' : 'alert alert-danger';
+    div.innerHTML = result.success ?
+        '✓ 签到成功' :
+        `× 签到失败：${result.error || '未知错误'}`;
+}
+</script>
+
+
 
             <!-- 实验报告面板 -->
             <div class="tab-pane fade" id="report" role="tabpanel">
