@@ -1,7 +1,8 @@
+# 用于人脸数据训练
 import cv2
 import os
 import numpy as np
-def train_model(data_dir='D:/cms1.1/files/face_pictures'):
+def train_model(data_dir='files/face_pictures'):
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     detector = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
@@ -33,8 +34,5 @@ def train_model(data_dir='D:/cms1.1/files/face_pictures'):
 
     # 训练模型
     recognizer.train(faces, np.array(labels))
-    recognizer.save('D:/cms1.1/files/face_data/face_model.yml')
+    recognizer.save('files/face_data/face_model.yml')
     return label_dict
-
-
-# label_dict = train_model()

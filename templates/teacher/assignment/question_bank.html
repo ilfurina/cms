@@ -1,0 +1,68 @@
+{% extends 'teacher/course_edit.html' %}
+{% load static %}
+
+{% block option %}
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" action="{% url 'teacher:create_assignment' current_course.course_id %}">
+                    <!-- 题型导航 -->
+                    <div class="mb-4">
+                        <div class="btn-group" role="group">
+                            {% for type_name, qs in question_types.items %}
+                                <button type="button" class="btn btn-outline-primary"
+                                        onclick="scrollToSection('{{ type_name }}')">
+                                    {{ qs.first.get_question_type_display }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- 题目列表 -->
+                    {% for type_name, qs in question_types.items %}
+                        <div class="mb-5" id="{{ type_name }}">
+                            <h5>{{ qs.first.get_question_type_display }}</h5>
+                            <div class="row g-3">
+                                {% for question in qs %}
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           name="selected" value="{{ question.id }}"
+                                                           {% if question.id|stringformat:"s" in selected_questions %}checked{% endif %}>
+                                                    <label class="form-check-label">
+                                                        {{ question.content|truncatechars:100 }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> 确认选择
+                        </button>
+                        <a href="{% url 'teacher:create_assignment' current_course.course_id %}"
+                           class="btn btn-outline-secondary">
+                            返回
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function scrollToSection(typeName) {
+            document.getElementById(typeName).scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+    </script>
+{% endblock %}

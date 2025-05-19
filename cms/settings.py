@@ -117,7 +117,6 @@ TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
@@ -146,4 +145,3 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # MEDIA_URL = '/media/'
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-

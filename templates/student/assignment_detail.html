@@ -1,35 +1,96 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-4">
-    <h2>{{ assignment.title }}</h2>
-    <div class="card mb-4">
-        <div class="card-body">
-            <p class="card-text">{{ assignment.description|linebreaks }}</p>
-            <p class="text-muted">
-                截止时间：{{ assignment.end_time|date:"Y-m-d H:i" }}
-            </p>
-        </div>
-    </div>
-
-    <form method="post" action="{% url 'student:submit_assignment' assignment.id %}">
-        {% csrf_token %}
-        {% for aq in assignment.assignmentquestion_set.all %}
-        <div class="card mb-3">
+    <div class="container mt-4">
+        <h2>{{ assignment.title }}</h2>
+        <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title">第 {{ forloop.counter }} 题（{{ aq.question.get_question_type_display }}）</h5>
-                <div class="ms-3">
-                    {% include "student/_question_template.html" with question=aq.question %}
-                </div>
+                <p class="card-text">{{ assignment.description|linebreaks }}</p>
+                <p class="text-muted">
+                    截止时间：{{ assignment.end_time|date:"Y-m-d H:i" }}
+                </p>
             </div>
         </div>
-        {% endfor %}
 
-        <div class="text-center mt-4">
-            <button type="submit" class="btn btn-primary btn-lg"
-                {% if submission.is_submitted %}disabled{% endif %}>
-                {{ submission.is_submitted|yesno:"已提交,提交作业" }}
-            </button>
-        </div>
-    </form>
-</div>
+        <form method="post" action="{% url 'student:submit_assignment' assignment.id %}">
+            {% csrf_token %}
+            {% for aq in assignment.assignmentquestion_set.all %}
+                {% with aq.question as question %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">第 {{ forloop.counter }}
+                                题（{{ aq.question.get_question_type_display }}）</h5>
+                            <div class="ms-3">
+
+                                {% if question.question_type == 'single' %}
+                                    <!-- 单选题 -->
+                                    <div class="single-choice">
+                                        <p>{{ question.content }}</p>
+                                        {% for option in question.singlechoicequestion.options %}
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio"
+                                                       name="question_{{ question.id }}"
+                                                       value="{{ forloop.counter0 }}"
+                                                       {% if answered.question.id %}checked{% endif %}>
+                                                <label class="form-check-label">{{ option }}</label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% elif question.question_type == 'multiple' %}
+                                    <!-- 多选题 -->
+                                    <div class="multiple-choice">
+                                        <p>{{ question.content }}</p>
+                                        {% for option in question.multiplechoicequestion.options %}
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox"
+                                                       name="question_{{ question.id }}"
+                                                       value="{{ forloop.counter0 }}"
+                                                       {% if option.checked %}checked{% endif %}>
+                                                <label class="form-check-label">{{ option }}</label>
+                                            </div>
+
+                                        {% endfor %}
+                                    </div>
+                                {% elif question.question_type == 'fill' %}
+                                    <!-- 填空题 -->
+                                    <div class="fill-blank my-4">
+                                        <h5 class="question-text">{{ question.content }}</h5>
+                                        {% with blanks=question.fillinblankquestion.correct_answer.split %}
+                                            {% for blank in blanks %}
+                                                <div class="form-group mb-3">
+                                                    <input type="text"
+                                                           style="width:50%; max-width:200px;"
+                                                           class="form-control"
+                                                           name="question_{{ question.id }}_{{ forloop.counter0 }}"
+                                                           placeholder="第 {{ forloop.counter }} 空">
+                                                </div>
+                                            {% endfor %}
+                                        {% endwith %}
+                                    </div>
+                                {% elif question.question_type == 'essay' %}
+                                    <!-- 问答题题 -->
+                                    <div class="essay my-4">
+                                        <h5 class="question-text">{{ question.content }}</h5>
+                                        <div class="form-group">
+                                            <input type="text" class="form-control"
+                                                   name="question_{{ question.id }}"
+                                                   style="height: 100px">
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                            </div>
+                        </div>
+                    </div>
+                {% endwith %}
+            {% endfor %}
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg"
+                        {% if submission.is_submitted %}disabled{% endif %}>
+                    {{ submission.is_submitted|yesno:"已提交,提交作业" }}
+                </button>
+            </div>
+
+        </form>
+    </div>
 {% endblock %}

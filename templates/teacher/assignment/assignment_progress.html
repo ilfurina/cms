@@ -2,84 +2,93 @@
 {% load static %}
 
 {% block content %}
-<div class="card">
-    <div class="card-body">
-        <h4 class="card-title">{{ assignment.title }} 完成情况</h4>
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">{{ assignment.title }} 完成情况</h4>
 
-        <!-- 饼状图容器 -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <canvas id="progressChart" style="max-height: 300px"></canvas>
-            </div>
-            <div class="col-md-6">
-                <div class="row">
-                    <div class="col-6">
-                        <div class="card bg-success text-white">
-                            <div class="card-body">
-                                <h5>已完成</h5>
-                                <h2>{{ submitted_students|length }}</h2>
+            <!-- 饼状图容器 -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <canvas id="progressChart" style="max-height: 300px"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>已完成</h5>
+                                    <h2>{{ submitted_students|length }}</h2>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="card bg-danger text-white">
-                            <div class="card-body">
-                                <h5>未完成</h5>
-                                <h2>{{ not_submitted_students|length }}</h2>
+                        <div class="col-6">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body">
+                                    <h5>未完成</h5>
+                                    <h2>{{ not_submitted_students|length }}</h2>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 学生列表 -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-success text-white">已完成学生</div>
-                    <ul class="list-group list-group-flush">
-                        {% for student in submitted_students %}
-                        <li class="list-group-item">{{ student.name }} ({{ student.student_id }})</li>
-                        {% empty %}
-                        <li class="list-group-item text-muted">暂无完成学生</li>
-                        {% endfor %}
-                    </ul>
+            <!-- 学生列表 -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">已完成学生</div>
+                        <ul class="list-group list-group-flush">
+                            {% for submission in submissions %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span>{{ submission.student.name }} ({{ submission.student.student_id }})</span>
+                                        <a href="{% url 'teacher:grade_submission' submission.id %}"
+                                           class="text-primary text-decoration-none">
+                                            批改
+                                        </a>
+                                    </div>
+                                </li>
+                            {% empty %}
+
+                                <li class="list-group-item text-muted">暂无完成学生</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
-            </div>
 
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-danger text-white">未完成学生</div>
-                    <ul class="list-group list-group-flush">
-                        {% for student in not_submitted_students %}
-                        <li class="list-group-item">{{ student.name }} ({{ student.student_id }})</li>
-                        {% empty %}
-                        <li class="list-group-item text-muted">所有学生已完成</li>
-                        {% endfor %}
-                    </ul>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">未完成学生</div>
+                        <ul class="list-group list-group-flush">
+                            {% for student in not_submitted_students %}
+                                <li class="list-group-item">{{ student.name }} ({{ student.student_id }})</li>
+                            {% empty %}
+                                <li class="list-group-item text-muted">所有学生已完成</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- 引入Chart.js -->
-<script src="{% static 'js/chart.js' %}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('progressChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'pie',
-        data: {{ chart_data|safe }},
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'bottom' },
-                tooltip: { enabled: true }
-            }
-        }
-    });
-});
-</script>
+    <!-- 引入Chart.js -->
+    <script src="{% static 'js/chart.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {{ chart_data|safe }},
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {position: 'bottom'},
+                        tooltip: {enabled: true}
+                    }
+                }
+            });
+        });
+    </script>
 {% endblock %}

@@ -37,6 +37,10 @@ urlpatterns = [
          assignment.CreateAssignmentView.as_view(), name='create_assignment'),
     path('assignment/<int:assignment_id>/progress/',
          assignment.assignment_progress, name='assignment_progress'),
+    path('assignment/<int:assignment_id>/delete/',
+         assignment.delete_assignment, name='delete_assignment'),
+    path('question_bank/', assignment.question_bank, name='question_bank'),
+    path('grade_submission/<int:submission_id>/', assignment.grade_submission, name='grade_submission'),
 
     # 实验报告
     path('course/<int:course_id>/reports/',

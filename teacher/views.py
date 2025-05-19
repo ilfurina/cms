@@ -1,5 +1,4 @@
 import string
-
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
@@ -7,11 +6,14 @@ from accounts.decorators import teacher_required
 import random
 from student.models import Student
 from sys_admin.models import Major, College
-from .models import Course, Attendance, CourseResource, Teacher, CourseApplication
+from .models import Course, Attendance, CourseResource, Teacher, CourseApplication,ReportAssignment,DiscussionTopic
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 import csv
-
+from django.contrib import messages
+from django.views.generic import CreateView, ListView
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 
 @teacher_required
 def dashboard(request):
@@ -27,14 +29,6 @@ def info(request):
 
     }
     return render(request, 'teacher/info.html', {'information': information})
-
-#教师创建课程
-# def go_to_create(request):
-#     # 当前用户所属学院的全部专业
-#     if request.user.teacher.college:
-#         college = request.user.teacher.college
-#         majors = Major.objects.filter(college=college)
-#     return render(request, 'teacher/create_course.html', {'majors': majors})
 
 def create_course(request):
     if request.method == 'GET':
@@ -87,12 +81,6 @@ def edit_course(request, course_id):
         'resources': resources,
     })
 
-
-
-from django.contrib import messages
-from django.shortcuts import redirect
-
-
 def delete_course(request, course_id):
     if request.method == 'POST':
         try:
@@ -132,12 +120,7 @@ def export_students(request, course_id):
 
     return response
 
-
-from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
-
 # 上传课程资源
-
 @require_POST
 def upload_resource(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
@@ -275,9 +258,6 @@ def delete_student(request, course_id,student_id):
 
     return redirect('teacher:students', course_id=course_id)
 
-from django.views.generic import CreateView, ListView
-from teacher.models import ReportAssignment
-
 class CreateReportView(CreateView):
     model = ReportAssignment
     fields = ['title', 'description', 'attachment', 'deadline']
@@ -321,9 +301,6 @@ class ReportListView(ListView):
         )
         return context
 
-
-from django.views.generic import CreateView, ListView
-from .models import DiscussionTopic
 
 class DiscussionListView(ListView):
     template_name = 'teacher/discussion_list.html'

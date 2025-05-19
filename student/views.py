@@ -1,27 +1,28 @@
-import base64
-import json
-import pickle
-
-import cv2
-import numpy as np
-from PIL.Image import Image
 from django.views.decorators.http import require_POST
-from django.views.generic import DetailView, CreateView
-
 from django.http import HttpResponseForbidden, FileResponse, HttpResponseBadRequest, Http404
 from django.shortcuts import render, redirect
 from django.utils import timezone
-
 from accounts.decorators import student_required
 from django.contrib import messages
-from teacher.models import Course, CourseResource, Assignment
+from teacher.models import Course, CourseResource, Assignment,Attendance,DiscussionTopic, DiscussionPost
 from sys_admin.models import Major
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from .recommender import CourseRecommender
 from student.train import train_model
-from teacher.models import Attendance
+from .models import Student, AssignmentSubmission, StudentAnswer
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
 
+import os
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+
+import base64
+import json
+import pickle
+import cv2
+import numpy as np
+from PIL.Image import Image
 
 @student_required
 def dashboard(request):
@@ -43,11 +44,6 @@ def info(request):
         'face_collected':user.face_collected,
     }
     return render(request, 'student/info.html', {'information': information})
-
-
-from .models import Student, AssignmentSubmission, StudentAnswer
-from django.shortcuts import get_object_or_404
-
 
 @student_required
 def edit_info(request):
@@ -94,19 +90,16 @@ def join_course(request):
 
     return redirect('student:dashboard')
 
+@student_required
+def course_recommendations(request):
+    student = request.user.student
+    enrolled_courses = student.courses.all()
+    recommended_courses = CourseRecommender().get_recommendations(student)
 
-class CourseRecommendationsView(LoginRequiredMixin, View):
-
-    def get(self, request):
-        student = request.user.student  # 假设已建立用户到Student的关联
-        enrolled_courses = student.courses.all()
-        recommended_courses = CourseRecommender.get_recommendations(student)
-
-        return render(request, 'student/recommendations.html', {
-            'enrolled_courses':enrolled_courses,
-            'recommended_courses': recommended_courses,
-        })
-
+    return render(request, 'student/recommendations.html', {
+        'enrolled_courses': enrolled_courses,
+        'recommended_courses': recommended_courses
+    })
 
 def course_detail(request, course_id):
     student = request.user.student
@@ -129,6 +122,15 @@ def course_detail(request, course_id):
         assignment__in=assignments
     ).values_list('assignment_id', flat=True)
 
+    # 获取已批改作业的分数
+    graded_submissions = AssignmentSubmission.objects.filter(
+        student=student,
+        assignment__in=assignments,
+        is_submitted=True
+    ).values('assignment_id', 'score')
+
+    assignment_scores = {s['assignment_id']: s['score'] for s in graded_submissions}
+
     return render(request, 'student/course_detail.html', {
         'course': course,
         'assignments': assignments,
@@ -136,7 +138,7 @@ def course_detail(request, course_id):
         'resources': resources,
         'submitted_assignments': set(submitted_assignments),
         'attendance': attendance,
-
+        'assignment_scores': assignment_scores,
     })
 
 
@@ -192,7 +194,30 @@ def submit_assignment(request, assignment_id):
     submission.is_submitted = True
     submission.save()
 
-    return redirect('student:assignment_detail', assignment_id=assignment_id)
+    total_score = 0
+    for answer in submission.studentanswer_set.all():
+        question = answer.question
+        if question.question_type == 'single':
+            correct = question.singlechoicequestion.correct_answer
+            score = 10 if answer.answer == correct else 0
+        elif question.question_type == 'multiple':
+            correct = set(question.multiplechoicequestion.correct_answers)
+            score = 10 if set(answer.answer) == correct else 0
+        elif question.question_type == 'fill':
+            keywords = question.fillinblankquestion.keywords
+            matches = sum(1 for kw in keywords if kw.lower() in answer.answer.lower())
+            score = round(10 * (matches / len(keywords)))
+        else:
+            score = 0  # 问答题等待教师批改
+
+        answer.score = score
+        answer.save()
+        total_score += score
+
+    submission.score = total_score
+    submission.save()
+
+    return redirect('student:course_detail', course_id=assignment.course.course_id)
 
 
 from urllib.parse import quote
@@ -208,39 +233,69 @@ def download_resource(request, filename):
 
     return response
 
-from teacher.models import DiscussionTopic, DiscussionPost
+# 讨论主题详情视图
+def discussion_detail(request, pk):
+    topic = get_object_or_404(DiscussionTopic, pk=pk)
 
-class StudentDiscussionView(DetailView):
-    model = DiscussionTopic
-    template_name = 'student/discussion_detail.html'
+    # 课程存在性校验
+    if not topic.course:
+        raise Http404("讨论主题未关联有效课程")
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['topic'] = get_object_or_404(DiscussionTopic, pk=self.kwargs['pk'])
-        if not self.object.course:  # 增加课程存在性校验
-            raise Http404("讨论主题未关联有效课程")
-        return context
-
-class CreatePostView(LoginRequiredMixin, CreateView):
-    model = DiscussionPost
-    fields = ['content']
-    template_name = 'student/create_post.html'
-
-    def form_valid(self, form):
-        form.instance.topic = get_object_or_404(DiscussionTopic, pk=self.kwargs['pk'])
-        form.instance.author = self.request.user
-        return super().form_valid(form)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['topic'] = get_object_or_404(DiscussionTopic, pk=self.kwargs['pk'])
-        return context
+    context = {
+        'topic': topic,
+        'object': topic  # 保持与原有模板变量兼容
+    }
+    return render(request, 'student/discussion_detail.html', context)
 
 
-import os
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from PIL import Image
+# 创建帖子视图
+@login_required
+def create_post(request, pk):
+    topic = get_object_or_404(DiscussionTopic, pk=pk)
+    student = get_object_or_404(Student, user=request.user)
+
+    if request.method == 'POST':
+        content = request.POST.get('content', '').strip()
+        if content:
+            DiscussionPost.objects.create(
+                topic=topic,
+                author=request.user,
+                content=content
+            )
+            return redirect('student:discussion_detail', pk=pk)
+
+    context = {
+        'topic': topic,
+        'form': {'content': ''}  # 保持与模板兼容
+    }
+    return render(request, 'student/create_post.html', context)
+
+
+# class StudentDiscussionView(DetailView):
+#     model = DiscussionTopic
+#     template_name = 'student/discussion_detail.html'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['topic'] = get_object_or_404(DiscussionTopic, pk=self.kwargs['pk'])
+#         if not self.object.course:  # 增加课程存在性校验
+#             raise Http404("讨论主题未关联有效课程")
+#         return context
+#
+# class CreatePostView(LoginRequiredMixin, CreateView):
+#     model = DiscussionPost
+#     fields = ['content']
+#     template_name = 'student/create_post.html'
+#
+#     def form_valid(self, form):
+#         form.instance.topic = get_object_or_404(DiscussionTopic, pk=self.kwargs['pk'])
+#         form.instance.author = self.request.user
+#         return super().form_valid(form)
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['topic'] = get_object_or_404(DiscussionTopic, pk=self.kwargs['pk'])
+#         return context
 
 
 @login_required
@@ -341,9 +396,9 @@ def check_in(request, course_id):
 
         # 加载模型和标签
         recognizer = cv2.face.LBPHFaceRecognizer_create()
-        recognizer.read('D:/cms1.1/files/face_data/face_model.yml')
+        recognizer.read('files/face_data/face_model.yml')
 
-        with open('D:/cms1.1/files/face_data/label_dict.pkl', 'rb') as f:
+        with open('files/face_data/label_dict.pkl', 'rb') as f:
             label_dict = pickle.load(f)
 
         # 人脸检测
@@ -363,13 +418,15 @@ def check_in(request, course_id):
         # 验证结果
         expected_id = student.student_id
         recognized_id = label_dict.get(label)
+        student = Student.objects.filter(student_id=recognized_id).first()
+        name = student.name
 
         if confidence > 70 or recognized_id != expected_id:
-            return JsonResponse({'success': False, 'error': '人脸识别验证失败'})
+            return JsonResponse({'success': False, 'error': '人脸识别验证失败','recognized_id': recognized_id})
 
         # 记录签到
         attendance.checked_students.add(student)
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True,'recognized_id': recognized_id})
 
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})

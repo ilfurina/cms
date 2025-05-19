@@ -56,18 +56,22 @@
                                 {{ assignment.end_time|date:"m/d H:i" }}
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-danger">
-                                    <i class="bi bi-trash"></i> 删除
-                                </button>
+                                <form method="post"
+                                      action="{% url 'teacher:delete_assignment' assignment_id=assignment.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                            onclick="return confirm('确认删除该作业？此操作不可逆！')">
+                                        <i class="bi bi-trash"></i> 删除
+                                    </button>
+                                </form>
                             </td>
+
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="
-{#{% url 'teacher:assignment_detail' course_id=current_course.course_id assignment_id=assignment.id %}#}
-"
-                                       class="btn btn-sm btn-outline-primary me-1">
-                                        <i class="bi bi-info-circle"></i> 详情
-                                    </a>
+{#                                    <a href="{#{% url 'teacher:assignment_detail' course_id=current_course.course_id assignment_id=assignment.id %}#}
+{#                                       class="btn btn-sm btn-outline-primary me-1">#}
+{#                                        <i class="bi bi-info-circle"></i> 详情#}
+{#                                    </a>#}
                                     <a href="{% url 'teacher:assignment_progress' assignment_id=assignment.id %}"
                                        class="btn btn-sm btn-outline-success">
                                         <i class="bi bi-bar-chart-line"></i> 完成情况

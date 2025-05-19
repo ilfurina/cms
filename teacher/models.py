@@ -10,7 +10,6 @@ from accounts.models import User
 from student.models import Student
 from sys_admin.models import Major,College
 import os
-from polymorphic.models import PolymorphicModel
 
 
 # 教师创建课程，学生可加入课程，教师可以在课程中发布实验、作业、考试等
@@ -67,7 +66,6 @@ class Course(models.Model):
 
 
 # 签到
-
 class Attendance(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='attendances')
     title = models.CharField(max_length=100, default="课堂签到")
@@ -124,7 +122,7 @@ class FillInBlankQuestion(QuestionBase):
 
 class EssayQuestion(QuestionBase):
     reference_answer = models.TextField(verbose_name="参考答案")
-    scoring_rubric = models.JSONField(null=True, verbose_name="评分标准")
+    # scoring_rubric = models.JSONField(null=True, verbose_name="评分标准")
 
 
 class Assignment(models.Model):

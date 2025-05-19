@@ -1,0 +1,93 @@
+{% extends 'teacher/course_edit.html' %}
+{% load static %}
+
+{% block option %}
+
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between mb-4">
+            <div class="btn-group" role="group">
+                <a href="{% url 'teacher:active_assignments' current_course.course_id %}"
+                   class="btn {% if request.resolver_match.url_name == 'active_assignments' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    进行中的任务
+                </a>
+                <a href="{% url 'teacher:create_assignment' current_course.course_id %}"
+                   class="btn {% if request.resolver_match.url_name == 'create_assignment' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    发布新任务
+                </a>
+            </div>
+        </div>
+
+        {#                    {% block assignment_content %}{% endblock %}#}
+    </div>
+
+    <div class="container-fluid">
+        <!-- 发布习题表单 -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <input type="text" name="title" class="form-control" placeholder="请输入作业标题" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="datetime-local" name="start_time" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="datetime-local" name="end_time" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                            <textarea name="description" class="form-control" rows="3"
+                                      placeholder="作业描述"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 题目选择区 -->
+                    <!-- 替换原有的题目选择区 -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                <a href="{% url 'teacher:question_bank' %}?course_id={{ current_course.course_id }}&selected=
+                                        {% for q in selected_questions %}{{ q.id }},{% endfor %}"
+                                   class="btn btn-outline-primary btn-sm float-end">
+                                    <i class="bi bi-plus-circle"></i> 添加题目
+                                </a>
+
+                                已选择 {{ selected_questions|length }} 道题目
+                            </div>
+
+                            <!-- 已选题目展示 -->
+                            <div class="row g-3">
+                                {% for q in selected_questions %}
+                                    <div class="col-md-6">
+                                        <div class="card mb-3">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between">
+                            <span class="badge bg-primary">
+                                {{ q.get_question_type_display }}
+                            </span>
+                                                    <a href="#" class="text-danger remove-question"
+                                                       data-id="{{ q.id }}">
+                                                        <i class="bi bi-x-circle"></i>
+                                                    </a>
+                                                </div>
+                                                <div class="mt-2">{{ q.content }}</div>
+                                                <input type="hidden" name="questions" value="{{ q.id }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">发布作业</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

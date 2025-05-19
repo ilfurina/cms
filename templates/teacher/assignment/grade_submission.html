@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h3>{{ submission.student.name }}的作业批改</h3>
+    <form method="post">
+        {% csrf_token %}
+        {% for answer in essay_answers %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>{{ answer.question.content }}</h5>
+                <p class="text-muted">学生答案：{{ answer.answer }}</p>
+                <div class="form-group">
+                    <label>评分（0-10分）:</label>
+                    <input type="number" name="score_{{ answer.question.id }}"
+                           value="{{ answer.score }}"
+                           min="0" max="10" class="form-control" style="width: 120px">
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">提交批改</button>
+    </form>
+</div>
+{% endblock %}

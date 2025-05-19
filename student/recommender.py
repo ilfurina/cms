@@ -4,7 +4,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from teacher.models import Course
 
-
 class ChineseTextProcessor:
     """中文文本处理器"""
     def __init__(self):
@@ -49,7 +48,6 @@ class CourseRecommender:
         # 获取候选课程（排除已选课程）
         enrolled_ids = enrolled_courses.values_list('course_id', flat=True)
         candidate_courses = Course.objects.exclude(course_id__in=enrolled_ids)
-
 
         # 中文预处理
         enrolled_descriptions = [self.processor.preprocess(c.description) for c in enrolled_courses]
