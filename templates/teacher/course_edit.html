@@ -65,7 +65,7 @@
                                 </a>
                                 <a class="nav-link {% if request.resolver_match.url_name in 'active_assignments,create_assignment' %}active{% endif %}"
                                    href="{% url 'teacher:active_assignments' current_course.course_id %}">
-                                    <i class="bi bi-journal-text"></i> 习题/考试
+                                    <i class="bi bi-journal-text"></i> 作业
                                 </a>
                                 <a class="nav-link {% if request.resolver_match.url_name in 'reports,create_report' %}active{% endif %}"
                                    href="{% url 'teacher:reports' current_course.course_id %}">

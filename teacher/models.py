@@ -139,7 +139,6 @@ class Assignment(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
-
     def status_badge(self):
         now = timezone.now()
         if now < self.start_time:

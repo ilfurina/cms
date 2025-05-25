@@ -165,13 +165,13 @@ def assignment_progress(request, assignment_id):
     })
 
 # 批改作业
-# teacher/assignment.py
 @teacher_required
 def grade_submission(request, submission_id):
     submission = get_object_or_404(AssignmentSubmission, id=submission_id)
     essay_questions = submission.assignment.questions.filter(question_type='essay')
 
     if request.method == 'POST':
+        # 只更新问答题分数
         for question in essay_questions:
             score = int(request.POST.get(f'score_{question.id}', 0))
             StudentAnswer.objects.update_or_create(
@@ -180,9 +180,17 @@ def grade_submission(request, submission_id):
                 defaults={'score': score}
             )
 
-        # 更新总分
-        total_score = sum(answer.score for answer in submission.studentanswer_set.all())
-        submission.score = total_score
+        # 计算新总分（自动评分 + 教师批改）
+        auto_score = sum(
+            answer.score
+            for answer in submission.studentanswer_set.exclude(question__question_type='essay')
+        )
+        essay_score = sum(
+            answer.score
+            for answer in submission.studentanswer_set.filter(question__question_type='essay')
+        )
+
+        submission.score = auto_score + essay_score
         submission.save()
         return redirect('teacher:assignment_progress', assignment_id=submission.assignment.id)
 
@@ -190,6 +198,7 @@ def grade_submission(request, submission_id):
         'submission': submission,
         'essay_answers': submission.studentanswer_set.filter(question__question_type='essay')
     })
+
 
 
 @teacher_required

@@ -101,15 +101,17 @@
                     {% endfor %}
                 </div>
             </div>
-            <div class="modal fade" id="gradeModal">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-body" id="gradeResult">
-                            <!-- 内容通过JS动态填充 -->
-                        </div>
-                    </div>
+<div class="modal fade" id="gradeModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4" id="gradeResult">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">加载中...</span>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
 
             <!-- 资料面板 -->
             <div class="tab-pane fade" id="materials" role="tabpanel">
@@ -139,7 +141,7 @@
                             <form id="checkinForm">
                                 <div class="mb-3">
                                     <label class="form-label">验证码</label>
-                                    <input type="text" class="form-control" name="code" required>
+                                    <input type="text" class="form-control " name="code" required style="width: 100px">
                                 </div>
                                 <input type="hidden" name="image" id="capturedImage">
                                 <button type="button" class="btn btn-primary" onclick="startCheckIn()">
@@ -161,7 +163,6 @@
 
         {{ assignment_scores|json_script:"assignment-scores-data" }}
             <script>
-                // 全局变量用于管理摄像头
                 let videoStream = null;
 
                 async function startCheckIn() {
@@ -219,8 +220,9 @@
                     div.className = result.success ? 'alert alert-success' : 'alert alert-danger';
 
                     // 添加识别结果显示
+
                     const idInfo = result.recognized_id ?
-                        `<div class="mt-2">识别结果：${result.recognized_id}</div>` : '';
+                        `<div class="mt-2">识别结果：${result.recognized_name}</div>` : '';
 
                     div.innerHTML = result.success ?
                         `✓ 签到成功 ${idInfo}` :
@@ -236,6 +238,13 @@ function showGradeDetails(assignmentId) {
     const content = score > 0 ?
         `<h5 class="text-success">成绩：${score}分</h5>` :
         `<h5 class="text-warning">作业尚未批阅</h5>`;
+
+        const detailContent = score > 0 ?
+        `<div class="mt-3">
+            <a href="/student/assignment/${assignmentId}/" class="btn btn-outline-info btn-sm">
+                <i class="bi bi-file-text"></i> 查看作答详情
+            </a>
+        </div>` : '';
 
     document.getElementById('gradeResult').innerHTML = `        <div class="text-center">
             ${content}            <button class="btn btn-secondary mt-3"

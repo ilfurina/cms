@@ -4,8 +4,8 @@ import os
 import numpy as np
 def train_model(data_dir='files/face_pictures'):
     recognizer = cv2.face.LBPHFaceRecognizer_create()
-    detector = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
+    detector = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
     faces = []
     labels = []
     label_dict = {}

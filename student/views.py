@@ -1,6 +1,5 @@
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden, FileResponse, HttpResponseBadRequest, Http404
-from django.shortcuts import render, redirect
 from django.utils import timezone
 from accounts.decorators import student_required
 from django.contrib import messages
@@ -12,7 +11,7 @@ from student.train import train_model
 from .models import Student, AssignmentSubmission, StudentAnswer
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-
+from cms.settings import BASE_DIR
 import os
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -22,7 +21,7 @@ import json
 import pickle
 import cv2
 import numpy as np
-from PIL.Image import Image
+from PIL import Image
 
 @student_required
 def dashboard(request):
@@ -128,8 +127,9 @@ def course_detail(request, course_id):
         assignment__in=assignments,
         is_submitted=True
     ).values('assignment_id', 'score')
+    assignment_scores = {int(s['assignment_id']): s['score'] for s in graded_submissions}
 
-    assignment_scores = {s['assignment_id']: s['score'] for s in graded_submissions}
+    # assignment_scores = {s['assignment_id']: s['score'] for s in graded_submissions}
 
     return render(request, 'student/course_detail.html', {
         'course': course,
@@ -369,7 +369,6 @@ from django.views.decorators.http import require_http_methods
 @student_required
 @require_http_methods(["POST"])
 def check_in(request, course_id):
-    # 获取必要数据
     student = request.user.student
     course = get_object_or_404(Course, course_id=course_id)
     data = json.loads(request.body)
@@ -422,7 +421,7 @@ def check_in(request, course_id):
         name = student.name
 
         if confidence > 70 or recognized_id != expected_id:
-            return JsonResponse({'success': False, 'error': '人脸识别验证失败','recognized_id': recognized_id})
+            return JsonResponse({'success': False, 'error': '人脸识别验证失败','recognized_id': recognized_id,'recognized_name': name})
 
         # 记录签到
         attendance.checked_students.add(student)
