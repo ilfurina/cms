@@ -258,48 +258,89 @@ def delete_student(request, course_id,student_id):
 
     return redirect('teacher:students', course_id=course_id)
 
-class CreateReportView(CreateView):
-    model = ReportAssignment
-    fields = ['title', 'description', 'attachment', 'deadline']
-    template_name = 'teacher/report_create.html'
+# class CreateReportView(CreateView):
+#     model = ReportAssignment
+#     fields = ['title', 'description', 'attachment', 'deadline']
+#     template_name = 'teacher/report_create.html'
+#
+#     def form_valid(self, form):
+#         course = get_object_or_404(Course, pk=self.kwargs['course_id'])
+#         form.instance.course = course
+#         form.instance.created_by = self.request.user.teacher
+#         return super().form_valid(form)
+#
+#     def get_success_url(self):
+#         return reverse('teacher:reports',
+#                        kwargs={'course_id': self.kwargs['course_id']})
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         # 添加当前课程到上下文
+#         context['current_course'] = get_object_or_404(
+#             Course,
+#             course_id=self.kwargs['course_id']
+#         )
+#         return context
+#
+# class ReportListView(ListView):
+#     model = ReportAssignment
+#     template_name = 'teacher/report_list.html'
+#     context_object_name = 'reports'
+#
+#     def get_queryset(self):
+#         return ReportAssignment.objects.filter(
+#             course_id=self.kwargs['course_id']
+#         ).order_by('-created_at')
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         # 添加当前课程到上下文
+#         context['current_course'] = get_object_or_404(
+#             Course,
+#             course_id=self.kwargs['course_id']
+#         )
+#         return context
+def report_list(request, course_id):
+    course = get_object_or_404(Course, course_id=course_id)
+    reports = ReportAssignment.objects.filter(course=course).order_by('-created_at')
 
-    def form_valid(self, form):
-        course = get_object_or_404(Course, pk=self.kwargs['course_id'])
-        form.instance.course = course
-        form.instance.created_by = self.request.user.teacher
-        return super().form_valid(form)
+    # 计算任务状态
+    now = timezone.now()
+    for report in reports:
+        report.status = '进行中' if report.deadline > now else '已结束'
 
-    def get_success_url(self):
-        return reverse('teacher:reports',
-                       kwargs={'course_id': self.kwargs['course_id']})
+    return render(request, 'teacher/report_list.html', {
+        'current_course': course,
+        'reports': reports
+    })
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # 添加当前课程到上下文
-        context['current_course'] = get_object_or_404(
-            Course,
-            course_id=self.kwargs['course_id']
+
+def create_report(request, course_id):
+    course = get_object_or_404(Course, course_id=course_id)
+
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        deadline = request.POST.get('deadline')
+        attachment = request.FILES.get('attachment')
+
+        # 创建报告任务
+        report = ReportAssignment(
+            course=course,
+            title=title,
+            description=description,
+            deadline=deadline,
+            attachment=attachment,
+            created_by=request.user.teacher
         )
-        return context
+        report.save()
 
-class ReportListView(ListView):
-    model = ReportAssignment
-    template_name = 'teacher/report_list.html'
-    context_object_name = 'reports'
+        messages.success(request, '任务发布成功')
+        return redirect('teacher:reports', course_id=course_id)
 
-    def get_queryset(self):
-        return ReportAssignment.objects.filter(
-            course_id=self.kwargs['course_id']
-        ).order_by('-created_at')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # 添加当前课程到上下文
-        context['current_course'] = get_object_or_404(
-            Course,
-            course_id=self.kwargs['course_id']
-        )
-        return context
+    return render(request, 'teacher/report_create.html', {
+        'current_course': course
+    })
 
 
 class DiscussionListView(ListView):

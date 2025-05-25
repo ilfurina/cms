@@ -3,12 +3,13 @@ from django.http import HttpResponseForbidden, FileResponse, HttpResponseBadRequ
 from django.utils import timezone
 from accounts.decorators import student_required
 from django.contrib import messages
-from teacher.models import Course, CourseResource, Assignment,Attendance,DiscussionTopic, DiscussionPost
+from teacher.models import Course, CourseResource, Assignment, Attendance, DiscussionTopic, DiscussionPost, \
+    ReportAssignment
 from sys_admin.models import Major
 from django.views import View
 from .recommender import CourseRecommender
 from student.train import train_model
-from .models import Student, AssignmentSubmission, StudentAnswer
+from .models import Student, AssignmentSubmission, StudentAnswer, ReportSubmission
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from cms.settings import BASE_DIR
@@ -49,7 +50,6 @@ def edit_info(request):
     student = get_object_or_404(Student, user=request.user)
 
     if request.method == 'POST':
-        # 更新可修改字段（示例字段，根据实际需求调整）
         major_id = request.POST.get('major')
         try:
             student.major = Major.objects.get(major_id=major_id)
@@ -130,6 +130,11 @@ def course_detail(request, course_id):
     assignment_scores = {int(s['assignment_id']): s['score'] for s in graded_submissions}
 
     # assignment_scores = {s['assignment_id']: s['score'] for s in graded_submissions}
+    reports = ReportAssignment.objects.filter(course=course).order_by('-created_at')
+    submitted_reports = ReportSubmission.objects.filter(
+        student=student,
+        report__in=reports
+    ).values_list('report_id', flat=True)
 
     return render(request, 'student/course_detail.html', {
         'course': course,
@@ -139,6 +144,8 @@ def course_detail(request, course_id):
         'submitted_assignments': set(submitted_assignments),
         'attendance': attendance,
         'assignment_scores': assignment_scores,
+        'reports': reports,
+        'submitted_reports': set(submitted_reports),
     })
 
 
@@ -270,32 +277,42 @@ def create_post(request, pk):
     }
     return render(request, 'student/create_post.html', context)
 
+@student_required
+@require_POST
+def submit_report(request, report_id):
+    report = get_object_or_404(ReportAssignment, id=report_id)
+    student = request.user.student
 
-# class StudentDiscussionView(DetailView):
-#     model = DiscussionTopic
-#     template_name = 'student/discussion_detail.html'
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['topic'] = get_object_or_404(DiscussionTopic, pk=self.kwargs['pk'])
-#         if not self.object.course:  # 增加课程存在性校验
-#             raise Http404("讨论主题未关联有效课程")
-#         return context
-#
-# class CreatePostView(LoginRequiredMixin, CreateView):
-#     model = DiscussionPost
-#     fields = ['content']
-#     template_name = 'student/create_post.html'
-#
-#     def form_valid(self, form):
-#         form.instance.topic = get_object_or_404(DiscussionTopic, pk=self.kwargs['pk'])
-#         form.instance.author = self.request.user
-#         return super().form_valid(form)
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['topic'] = get_object_or_404(DiscussionTopic, pk=self.kwargs['pk'])
-#         return context
+    if report.deadline < timezone.now():
+        messages.error(request, "已超过提交截止时间")
+        return redirect('student:course_detail', course_id=report.course.course_id)
+
+    submission_file = request.FILES.get('submission_file')
+    if not submission_file:
+        messages.error(request, "请选择要提交的文件")
+        return redirect('student:course_detail', course_id=report.course.course_id)
+
+    # 文件类型校验
+    allowed_types = ['.pdf', '.doc', '.docx', '.zip']
+    if not any(submission_file.name.lower().endswith(ext) for ext in allowed_types):
+        messages.error(request, "仅支持PDF、Word文档或ZIP压缩包")
+        return redirect('student:course_detail', course_id=report.course.course_id)
+
+    # 文件大小限制（50MB）
+    if submission_file.size > 50 * 1024 * 1024:
+        messages.error(request, "文件大小超过50MB限制")
+        return redirect('student:course_detail', course_id=report.course.course_id)
+
+    # 创建提交记录
+    ReportSubmission.objects.create(
+        report=report,
+        student=student,
+        submission_file=submission_file,
+        comment=request.POST.get('comment', '')
+    )
+
+    messages.success(request, "提交成功")
+    return redirect('student:course_detail', course_id=report.course.course_id)
 
 
 @login_required
@@ -354,7 +371,7 @@ def upload_face(request):
                     pickle.dump(label_dict, f) #将训练结果保存到文件中
 
                 student.face_collected  = True
-                student.save() #将状态改为已保存
+                student.save()
 
                 return JsonResponse({'success': True, 'saved_path': save_path})
             return JsonResponse({'success': False, 'error': '未接收到图片'})

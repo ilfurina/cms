@@ -39,9 +39,6 @@
                 <div class="card mt-4 shadow-sm">
                     <div class="card-header bg-info text-white">人脸信息管理</div>
 
-{#                    {% if information.face_collected %}#}
-{#                    <div class="card-header text-black">人脸信息已采集</div>#}
-{#                    {% else %}#}
                     <div class="card-body text-center">
                         <button id="startCapture" class="btn btn-primary mb-3">
                             <i class="bi bi-camera"></i> 录入人脸信息
@@ -82,7 +79,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalImages = 30;
     let isCapturing = false;
 
-    // 获取CSRF Token
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {

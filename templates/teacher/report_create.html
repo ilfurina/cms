@@ -19,7 +19,7 @@
 
     <div class="border rounded p-3">
         <h6>新建实验报告任务</h6>
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" action="{% url 'teacher:create_report' current_course.course_id %}">
             {% csrf_token %}
             <div class="mb-3">
                 <label class="form-label">任务标题</label>

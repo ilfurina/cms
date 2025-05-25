@@ -43,10 +43,14 @@ urlpatterns = [
     path('grade_submission/<int:submission_id>/', assignment.grade_submission, name='grade_submission'),
 
     # 实验报告
+    # path('course/<int:course_id>/reports/',
+    #      views.ReportListView.as_view(), name='reports'),
+    # path('course/<int:course_id>/report/create/',
+    #      views.CreateReportView.as_view(), name='create_report'),
     path('course/<int:course_id>/reports/',
-         views.ReportListView.as_view(), name='reports'),
+         views.report_list, name='reports'),
     path('course/<int:course_id>/report/create/',
-         views.CreateReportView.as_view(), name='create_report'),
+         views.create_report, name='create_report'),
 
     # 课程讨论
     path('course/<int:course_id>/discussions/',

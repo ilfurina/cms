@@ -24,3 +24,11 @@ class StudentAnswer(models.Model):
     question = models.ForeignKey('teacher.QuestionBase', on_delete=models.CASCADE)
     answer = models.JSONField()  # 存储不同题型的答案
     score = models.FloatField(default=0) # 存储每个题目的得分
+
+class ReportSubmission(models.Model):
+    report = models.ForeignKey('teacher.ReportAssignment', on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    submission_file = models.FileField(upload_to='files/report_submissions/%Y/%m/')
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    comment = models.TextField(blank=True)
+

@@ -11,8 +11,9 @@ urlpatterns = [
     path('course/<int:course_id>/', views.course_detail, name='course_detail'),
     path('assignment/<int:assignment_id>/', views.assignment_detail, name='assignment_detail'),
     path('download/<path:filename>/', views.download_resource, name='download_resource'),
-    path('assignment/<int:assignment_id>/', views.assignment_detail, name='assignment_detail'),
+
     path('submit_assignment/<int:assignment_id>/', views.submit_assignment, name='submit_assignment'),
+    path('assignment/<int:assignment_id>/', views.assignment_detail, name='assignment_detail'),
     path('discussion/<int:pk>/', views.discussion_detail,
          name='discussion_detail'),
     path('discussion/<int:pk>/reply/', views.create_post,
@@ -20,5 +21,6 @@ urlpatterns = [
     path('upload_face/', views.upload_face, name='upload_face'),
     path('start_capture/', views.start_capture, name='start_capture'),
     path('check_in/<int:course_id>/', views.check_in, name='check_in'),
+path('submit_report/<int:report_id>/', views.submit_report, name='submit_report'),
 
 ]
