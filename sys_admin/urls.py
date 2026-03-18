@@ -1,5 +1,4 @@
 from django.urls import path
-
 from sys_admin import views
 
 app_name = 'admin'

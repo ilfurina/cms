@@ -80,7 +80,7 @@ def news_detail(request, news_id):
     return render(request, 'admin/news.html', {'news': news,  'news_content': news_content})
 
 def carousel_list(request):
-    carousels = Carousel.objects.filter(is_active=True).order_by('order')
+    carousels = Carousel.objects.all().order_by('order')  # 移除is_active筛选
     return render(request, 'admin/carousel_list.html', {'carousels': carousels})
 
 

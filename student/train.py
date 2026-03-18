@@ -3,7 +3,13 @@ import cv2
 import os
 import numpy as np
 def train_model(data_dir='files/face_pictures'):
-    recognizer = cv2.face.LBPHFaceRecognizer_create()
+    recognizer = cv2.face.LBPHFaceRecognizer_create(
+        radius = 1,
+        neighbors = 8,
+        grid_x = 8,
+        grid_y = 8,
+        threshold = 70
+    )
 
     detector = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
     faces = []

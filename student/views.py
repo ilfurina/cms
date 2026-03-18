@@ -317,7 +317,7 @@ def submit_report(request, report_id):
 
 @login_required
 def start_capture(request):
-    """初始化采集，清空旧数据"""
+
     if request.method == 'POST':
         student = request.user.student  # 假设Student模型与User关联
         save_dir = os.path.join('files', 'face_pictures', str(student.student_id))
@@ -405,7 +405,7 @@ def check_in(request, course_id):
 
     # 人脸识别验证
     try:
-        # 转换Base64图像
+
         image_data = data['image'].split(',')[1]
         nparr = np.frombuffer(base64.b64decode(image_data), np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
@@ -438,7 +438,7 @@ def check_in(request, course_id):
         name = student.name
 
         if confidence > 70 or recognized_id != expected_id:
-            return JsonResponse({'success': False, 'error': '人脸识别验证失败','recognized_id': recognized_id,'recognized_name': name})
+            return JsonResponse({'success': False, 'error': '人脸识别验证失败','recognized_id': recognized_id})
 
         # 记录签到
         attendance.checked_students.add(student)
